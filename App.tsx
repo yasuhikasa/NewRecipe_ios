@@ -1,118 +1,130 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState, useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import LoginScreen from './src/screens/LoginScreen';
+import ContactScreen from './src/screens/ContactScreen';
+import { RootStackParamList } from './src/types/types';
+import supabase from './src/config/supabaseClient';
+import SubscriptionScreen from './src/screens/SubscriptionScreen';
+import AboutAppScreen from './src/screens/about/AboutAppScreen';
+import TermsOfServiceScreen from './src/screens/about/TermsOfServiceScreen';
+import PrivacyPolicyScreen from './src/screens/about/PrivacyPolicyScreen';
+import CommercialTransactionScreen from './src/screens/about/CommercialTransactionScreen';
+import AppOperatorScreen from './src/screens/about/AppOperatorScreen';
+import LoginHelpScreen from './src/screens/about/LoginHelpScreen';
+import { restoreSession } from './src/utils/restoreSession';
+import DashboardScreen from './src/screens/DashboardScreen';
+import RecipeCreateScreen from './src/screens/RecipeCreateScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const Stack = createStackNavigator<RootStackParamList>();
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+function App() {
+  const [isLoading, setIsLoading] = useState(true); // セッション復元中の状態
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // ログイン状態
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  // イベントリスナーを使ってログイン状態を監視
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        await AsyncStorage.setItem('loginSession', JSON.stringify(session));
+        console.log('セッション更新:', session);
+        setIsLoggedIn(true);
+      } else if (event === 'SIGNED_OUT') {
+        await AsyncStorage.removeItem('loginSession');
+        setIsLoggedIn(false);
+      }
+    });
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+    return () => subscription.unsubscribe(); // クリーンアップ
+  }, []);
+
+  // セッション復元処理
+  useEffect(() => {
+    const initializeApp = async () => {
+      await restoreSession(); // セッション復元
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        setIsLoggedIn(true);
+      }
+      setIsLoading(false); // ローディングを終了
+    };
+
+    initializeApp();
+  }, []);
+
+  if (isLoading) {
+    // セッション復元中はローディング画面を表示
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName={isLoggedIn ? 'Dashboard' : 'Login'}
+      >
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ title: 'レシピアプリ' }}
+        />
+
+        <Stack.Screen
+          name="Dashboard"
+          component={DashboardScreen}
+          options={{ title: 'ダッシュボード' }}
+        />
+        <Stack.Screen name="Contact" component={ContactScreen} />
+        <Stack.Screen
+          name="Subscription"
+          component={SubscriptionScreen}
+          options={{ title: 'サブスクリプションについて' }}
+        />
+        <Stack.Screen
+          name="AboutApp"
+          component={AboutAppScreen}
+          options={{ title: 'このアプリについて' }}
+        />
+        <Stack.Screen
+          name="TermsOfService"
+          component={TermsOfServiceScreen}
+          options={{ title: '利用規約' }}
+        />
+        <Stack.Screen
+          name="PrivacyPolicy"
+          component={PrivacyPolicyScreen}
+          options={{ title: 'プライバシーポリシー' }}
+        />
+        <Stack.Screen
+          name="LoginHelp"
+          component={LoginHelpScreen}
+          options={{ title: '新規登録、ログインでお困りの方へ' }}
+        />
+        <Stack.Screen
+          name="CommercialTransaction"
+          component={CommercialTransactionScreen}
+          options={{ title: '特定商取引法に基づく記載' }}
+        />
+        <Stack.Screen
+          name="AppOperator"
+          component={AppOperatorScreen}
+          options={{ title: '運営者について' }}
+        />
+        <Stack.Screen
+          name="RecipeCreate"
+          component={RecipeCreateScreen}
+          options={{ title: 'レシピを投稿' }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
