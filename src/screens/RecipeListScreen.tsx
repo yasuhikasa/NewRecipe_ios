@@ -37,7 +37,7 @@ const RecipeListScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const fetchRecipes = async (user_id: string) => {
     setLoading(true);
     try {
-      const response = await axios.get('https://recipeapp1-two.vercel.app/api/recipes', {
+      const response = await axios.get('https://recipeapp-096ac71f3c9b.herokuapp.com/api/recipes', {
         params: { user_id },
       });
 

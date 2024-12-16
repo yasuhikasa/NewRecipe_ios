@@ -30,7 +30,7 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({ visible, recipeId
   const fetchRecipeDetails = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`https://recipeapp1-two.vercel.app/api/recipes/${recipeId}`);
+      const response = await axios.get(`https://recipeapp-096ac71f3c9b.herokuapp.com/api/recipes/${recipeId}`);
   
       if (response.status === 200) {
         setRecipe(response.data.recipe);
@@ -84,7 +84,7 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({ visible, recipeId
       const user_id = userData.user.id;
 
       // レシピ削除を実行
-      const response = await axios.delete(`https://recipeapp1-two.vercel.app/api/recipes/${recipeId}`, {
+      const response = await axios.delete(`https://recipeapp-096ac71f3c9b.herokuapp.com/api/recipes/${recipeId}`, {
         data: { user_id }, // user_id をリクエストボディに含める
       });
 
@@ -124,9 +124,23 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({ visible, recipeId
           ) : (
             <>
               <ScrollView style={styles.contentContainer}>
-                <Text style={styles.title}>{recipe?.title}</Text>
-                <ReactMarkdown>{recipe?.recipe || ''}</ReactMarkdown>
-              </ScrollView>
+  <Text style={styles.title}>{recipe?.title}</Text>
+  <ReactMarkdown
+    style={{
+      body: styles.markdownBody,
+      heading1: styles.heading1,
+      heading2: styles.heading2,
+      heading3: styles.heading3,
+      heading4: styles.heading4,
+      listItem: styles.listItem,
+      strong: styles.strong,
+      em: styles.em,
+      blockquote: styles.blockquote,
+    }}
+  >
+    {recipe?.recipe || ''}
+  </ReactMarkdown>
+</ScrollView>
               <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.deleteButton} onPress={handleDelete} disabled={isDeleting}>
                   {isDeleting ? (
@@ -208,6 +222,59 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  markdownBody: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#333',
+    marginBottom: 12,
+  },
+  heading1: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ff6347',
+    marginBottom: 12,
+  },
+  heading2: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffa07a',
+    marginBottom: 10,
+  },
+  heading3: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#f08080',
+    marginBottom: 8,
+  },
+  heading4: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#cd5c5c',
+    marginBottom: 6,
+    marginTop: 6,
+  },
+  listItem: {
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 8,
+    color: '#333',
+  },
+  strong: {
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  em: {
+    fontStyle: 'italic',
+    color: '#555',
+  },
+  blockquote: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#ffa07a',
+    paddingLeft: 12,
+    fontStyle: 'italic',
+    marginBottom: 10,
+    color: '#555',
   },
 });
 

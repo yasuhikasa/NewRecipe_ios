@@ -123,7 +123,7 @@ function App() {
           component={RecipeCreateScreen}
           options={{ title: 'レシピを投稿' }}
         />
-        <Stack.Screen name="Recipes" component={RecipeListScreen} options={{ title: '保存されたレシピ' }} />
+        <Stack.Screen name="RecipeList" component={RecipeListScreen} options={{ title: '保存されたレシピ' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

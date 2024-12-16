@@ -58,7 +58,7 @@ const RecipeFormExtended = () => {
     preference: '',
   });
 
-  const [generatedRecipe, setGeneratedRecipe] = useState<string | null>(null);
+  const [generatedRecipe, setGeneratedRecipe] = useState<string>('');
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,16 +91,21 @@ const RecipeFormExtended = () => {
     }));
   };
 
-  // レシピ生成関数
+  // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
     try {
       setIsGenerating(true);
-      const response = await axios.post('https://recipeapp1-two.vercel.app/api/ai-recipe', formData, {
+      setGeneratedRecipe(''); // 初期化
+      setModalOpen(true); // モーダルを先に開く
+
+      const response = await axios.post('https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-recipe', formData, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      console.log('API Response:', response.data); // デバッグログ
+
+      console.log('API Response:', response.data);
+
       if (response.data && response.data.recipe) {
         setGeneratedRecipe(response.data.recipe);
       } else {
@@ -111,9 +116,6 @@ const RecipeFormExtended = () => {
       setError('レシピ生成中にエラーが発生しました。');
     } finally {
       setIsGenerating(false);
-      if (generatedRecipe) { // 生成が成功した場合のみモーダルを開く
-        setModalOpen(true);
-      }
     }
   };
 
@@ -133,28 +135,28 @@ const RecipeFormExtended = () => {
       Alert.alert('Error', '保存するレシピがありません。');
       return;
     }
-  
+
     try {
       // Supabase から uid を取得
       const {
         data: { user },
       } = await supabase.auth.getUser();
-  
+
       if (!user || !user.id) {
         Alert.alert('エラー', 'ユーザーが認証されていません。ログインしてください。');
         return;
       }
-  
+
       const user_id = user.id;
-  
+
       // サーバーにレシピデータを送信
-      const response = await axios.post('https://recipeapp1-two.vercel.app/api/save-recipe', {
+      const response = await axios.post('https://recipeapp-096ac71f3c9b.herokuapp.com/api/save-recipe', {
         recipe: generatedRecipe,
         formData,
         title,
         user_id, // uid を送信
       });
-  
+
       if (response.status === 200) {
         Alert.alert('成功', response.data.message);
         setModalOpen(false);
@@ -246,7 +248,8 @@ const RecipeFormExtended = () => {
           )}
         </View>
 
-        {generatedRecipe && (
+        {/* ストリーミングされたレシピを表示するためのモーダル */}
+        {modalOpen && (
           <RecipeModal
             open={modalOpen}
             recipe={generatedRecipe}

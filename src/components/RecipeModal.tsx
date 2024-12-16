@@ -1,5 +1,5 @@
 // src/components/RecipeModal.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   View,
@@ -10,8 +10,8 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-} from "react-native";
-import ReactMarkdown from "react-native-markdown-display";
+} from 'react-native';
+import ReactMarkdown from 'react-native-markdown-display';
 
 type RecipeModalProps = {
   open: boolean;
@@ -31,27 +31,32 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
   isGenerating,
 }) => {
   const [title, setTitle] = useState<string>('');
+  const [isSaving, setIsSaving] = useState<boolean>(false); 
 
-  // レシピ名を抽出して初期値に設定
+  // レシピタイトルを抽出して初期値を設定
   useEffect(() => {
     if (recipe) {
-      // レシピ名の抽出ロジックを実装（例として単純に最初の行をタイトルとする）
       const lines = recipe.split('\n');
-      const titleLine = lines.find((line) => line.startsWith('レシピ名:'));
+      const titleLine = lines.find((line) => line.startsWith('### レシピ名:')); // レシピ名行を探す
       if (titleLine) {
-        setTitle(titleLine.replace('レシピ名:', '').trim());
-      } else {
-        setTitle('');
+        setTitle(titleLine.replace('### レシピ名:', '').trim()); // "### レシピ名:" を除去
       }
     }
   }, [recipe]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim()) {
       Alert.alert('Error', 'タイトルを入力してください。');
       return;
     }
-    onSave(title.trim());
+    setIsSaving(true); // 保存開始
+    try {
+      await onSave(title.trim());
+    } catch (error) {
+      Alert.alert('Error', '保存中にエラーが発生しました。');
+    } finally {
+      setIsSaving(false); // 保存終了
+    }
   };
 
   return (
@@ -61,10 +66,10 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose}>
-        <TouchableOpacity style={styles.modalContainer} activeOpacity={1}>
+      <View style={styles.overlay}>
+        <View style={styles.modalContainer}>
           <ScrollView contentContainerStyle={styles.contentContainer}>
-            <Text style={styles.title}>AIが提案したレシピ 🍴</Text>
+            <Text style={styles.title}>生成中のレシピ 🍴</Text>
 
             {isGenerating ? (
               <View style={styles.loadingContainer}>
@@ -73,46 +78,112 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
               </View>
             ) : (
               <>
-                <ReactMarkdown style={markdownStyles}>{recipe}</ReactMarkdown>
+                {/* マークダウンのプレビュー */}
+                <ReactMarkdown style={mstyles}>{recipe}</ReactMarkdown>
 
+                {/* タイトル入力フィールド */}
                 <View style={styles.inputContainer}>
                   <Text style={styles.inputLabel}>保存するレシピタイトルを設定してください 🍴</Text>
                   <TextInput
                     style={styles.input}
-                    value={title}
-                    onChangeText={setTitle}
                     placeholder="レシピタイトルを入力してください"
-                    maxLength={50}
+                    value={title}
+                    onChangeText={(text) => setTitle(text)}
+                    maxLength={30}
                   />
                 </View>
 
+                {/* ボタンコンテナ */}
                 <View style={styles.buttonContainer}>
-                  <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={isGenerating}>
-                    <Text style={styles.saveButtonText}>保存する</Text>
+                <TouchableOpacity
+                    style={[styles.button, styles.saveButton]}
+                    onPress={handleSave}
+                    disabled={isGenerating}
+                  >
+                {isSaving ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <Text style={styles.buttonText}>保存する</Text>
+                    )}
+                    </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.button, styles.closeButton]}
+                    onPress={onClose}
+                    disabled={isGenerating}
+                  >
+                    <Text style={styles.buttonText}>閉じる</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.cancelButton} onPress={onClose} disabled={isGenerating}>
-                    <Text style={styles.cancelButtonText}>保存しない</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.newRecipeButton} onPress={onGenerateNewRecipe} disabled={isGenerating}>
-                    <Text style={styles.newRecipeButtonText}>別のレシピを見る</Text>
+
+                  <TouchableOpacity
+                    style={[styles.button, styles.newRecipeButton]}
+                    onPress={onGenerateNewRecipe}
+                    disabled={isGenerating}
+                  >
+                    <Text style={styles.buttonText}>別のレシピを見る</Text>
                   </TouchableOpacity>
                 </View>
               </>
             )}
           </ScrollView>
-        </TouchableOpacity>
-      </TouchableOpacity>
+        </View>
+      </View>
     </Modal>
   );
 };
 
-const markdownStyles = {
+const mstyles = StyleSheet.create({
   body: {
-    color: '#333',
     fontSize: 16,
     lineHeight: 24,
+    color: '#333',
+    marginBottom: 8,
   },
-};
+  heading1: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#ff6347',
+  },
+  heading2: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#ffa07a',
+  },
+  heading3: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#f08080',
+  },
+  heading4: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    marginTop: 6,
+    color: '#cd5c5c',
+  },
+  listItem: {
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 6,
+    color: '#333',
+  },
+  strong: {
+    fontWeight: 'bold',
+  },
+  em: {
+    fontStyle: 'italic',
+  },
+  blockquote: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#ffa07a',
+    paddingLeft: 12,
+    fontStyle: 'italic',
+    marginBottom: 10,
+  },
+});
+
 
 const styles = StyleSheet.create({
   overlay: {
@@ -123,11 +194,11 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    backgroundColor: '#fffaf0',
+    borderRadius: 8,
     width: '100%',
-    maxHeight: '90%',
-    padding: 20,
+    maxHeight: '80%',
+    padding: 16,
   },
   contentContainer: {
     flexGrow: 1,
@@ -136,77 +207,60 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#ff6347',
+    marginBottom: 12,
     textAlign: 'center',
-    marginBottom: 20,
   },
   loadingContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 20,
+    marginTop: 20,
   },
   loadingText: {
-    marginTop: 10,
     fontSize: 16,
     color: '#555',
+    marginTop: 10,
   },
   inputContainer: {
     marginTop: 20,
   },
   inputLabel: {
     fontSize: 16,
-    color: '#333',
+    color: 'red',
     marginBottom: 8,
   },
   input: {
-    borderColor: '#ccc',
     borderWidth: 1,
+    borderColor: '#ccc',
     borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    padding: 10,
     fontSize: 16,
     backgroundColor: '#f9f9f9',
   },
   buttonContainer: {
-    flexDirection: 'column',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
   },
+  button: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   saveButton: {
     backgroundColor: '#ff6347',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 10,
   },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  cancelButton: {
-    backgroundColor: '#fff',
-    borderColor: '#ff6347',
-    borderWidth: 1,
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  cancelButtonText: {
-    color: '#ff6347',
-    fontSize: 16,
-    fontWeight: 'bold',
+  closeButton: {
+    backgroundColor: '#4CAF50',
   },
   newRecipeButton: {
-    backgroundColor: '#4CAF50',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  newRecipeButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    backgroundColor: '#008CBA',
   },
 });
 
