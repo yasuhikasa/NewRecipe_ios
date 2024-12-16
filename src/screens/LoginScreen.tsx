@@ -17,6 +17,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/types';
 import { useNavigation } from '@react-navigation/native';
+import { getReceiptFromIAP, sendReceiptToServer } from '../utils/iapUtils';
 import {
   checkSubscriptionByEmail,
   checkUserProfileByEmail,
@@ -35,6 +36,7 @@ const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
+  const [isTestLogin, setIsTestLogin] = useState<boolean>(false);
   // const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [confirmEmail, setConfirmEmail] = useState<string>(''); // 確認用メールアドレス
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']); // 6桁のOTP
@@ -43,6 +45,8 @@ const LoginScreen: React.FC = () => {
   const [isSignUpModalVisible, setIsSignUpModalVisible] =
     useState<boolean>(false); // サインアップ確認モーダル
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const [testEmail, setTestEmail] = useState<string>('');
+  const [testPassword, setTestPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false); // ローディング状態
 
   const { isLargeScreen, isLandscape } = useDeviceOrientation();
@@ -202,6 +206,10 @@ const LoginScreen: React.FC = () => {
 
         // サインアップ確認モーダルを表示
         setIsSignUpModalVisible(true);
+        // テスト用のログイン
+      } else if ((email as string) === 'zaitakukiroku@gmail.com') {
+        setIsTestLogin(true);
+      } else {
         // ログイン時
         setIsLoading(true); // ローディング開始
         // メールアドレスのバリデーション
@@ -302,29 +310,29 @@ const LoginScreen: React.FC = () => {
       //   console.warn('レシートに original_transaction_id が含まれていません。');
       // }
 
-      // 3. ユーザープロファイル作成
-      if (data && data.user) {
-        const profileResponse = await fetch(
-          'https://mail-backend-iota.vercel.app/api/newcare/NewCareCreateUserProfiles',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId,
-              email,
-              // phoneNumber,
-              // originalTransactionId,
-            }),
-          },
-        );
+      // // 3. ユーザープロファイル作成
+      // if (data && data.user) {
+      //   const profileResponse = await fetch(
+      //     'https://mail-backend-iota.vercel.app/api/newcare/NewCareCreateUserProfiles',
+      //     {
+      //       method: 'POST',
+      //       headers: { 'Content-Type': 'application/json' },
+      //       body: JSON.stringify({
+      //         userId,
+      //         email,
+      //         // phoneNumber,
+      //         // originalTransactionId,
+      //       }),
+      //     },
+      //   );
 
-        if (!profileResponse.ok) {
-          console.error(
-            'プロフィール作成エラー:',
-            await profileResponse.text(),
-          );
-        }
-      }
+      //   if (!profileResponse.ok) {
+      //     console.error(
+      //       'プロフィール作成エラー:',
+      //       await profileResponse.text(),
+      //     );
+      //   }
+      // }
 
       // // 4. サブスクリプション更新
       // if (receipt) {

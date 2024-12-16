@@ -168,9 +168,25 @@ const RecipeFormExtended = () => {
             options={mealTimeOptions}
           />
 
+          {/* 予算のセレクトボックスを追加 */}
+          <CustomSelect
+            label="予算💰"
+            selectedValue={formData.budget}
+            onValueChange={(value) => handleSelectChange('budget', value)}
+            options={budgetOptions}
+          />
+
+          {/* 人数のセレクトボックスを追加 */}
+          <CustomSelect
+            label="人数👥"
+            selectedValue={formData.people}
+            onValueChange={(value) => handleSelectChange('people', value)}
+            options={peopleOptions}
+          />
+
           <View style={styles.section}>
             <Text style={styles.label}>手間</Text>
-            {effortOptions.map((option:Option) => (
+            {effortOptions.map((option: Option) => (
               <CustomCheckbox
                 key={option.value}
                 value={formData.effort.includes(option.value)}
@@ -256,6 +272,5 @@ const styles = StyleSheet.create({
     marginBottom: 20, // 各セクションのマージン
   },
 });
-
 
 export default RecipeFormExtended;
