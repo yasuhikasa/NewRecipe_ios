@@ -1,3 +1,4 @@
+// src/components/RecipeFormExtended.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -9,6 +10,7 @@ import {
   ScrollView,
   Keyboard,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
 import {
@@ -20,9 +22,10 @@ import {
   peopleOptions,
   preferenceOptions,
 } from '../utils/options';
-import RecipeModal from './RecipeModal';
+import RecipeModal from './RecipeModal'; // 別ファイルからインポート
 import CustomCheckbox from './CustomCheckbox'; // カスタムチェックボックス
 import CustomSelect from './CustomSelect'; // カスタムセレクトボックス
+import supabase from '../config/supabaseClient';
 
 // フォームデータの型定義
 type FormData = {
@@ -92,18 +95,25 @@ const RecipeFormExtended = () => {
   const generateRecipe = async () => {
     try {
       setIsGenerating(true);
-      const response = await axios.post('https://your-api-domain.com/api/ai-recipe', formData, {
+      const response = await axios.post('https://recipeapp1-two.vercel.app/api/ai-recipe', formData, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      setGeneratedRecipe(response.data.recipe);
+      console.log('API Response:', response.data); // デバッグログ
+      if (response.data && response.data.recipe) {
+        setGeneratedRecipe(response.data.recipe);
+      } else {
+        throw new Error('Invalid API response');
+      }
     } catch (err) {
       console.error('Error generating recipe:', err);
       setError('レシピ生成中にエラーが発生しました。');
     } finally {
       setIsGenerating(false);
-      setModalOpen(true);
+      if (generatedRecipe) { // 生成が成功した場合のみモーダルを開く
+        setModalOpen(true);
+      }
     }
   };
 
@@ -123,18 +133,37 @@ const RecipeFormExtended = () => {
       Alert.alert('Error', '保存するレシピがありません。');
       return;
     }
-
+  
     try {
-      const response = await axios.post('https://your-api-domain.com/api/save-recipe', {
+      // Supabase から uid を取得
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+  
+      if (!user || !user.id) {
+        Alert.alert('エラー', 'ユーザーが認証されていません。ログインしてください。');
+        return;
+      }
+  
+      const user_id = user.id;
+  
+      // サーバーにレシピデータを送信
+      const response = await axios.post('https://recipeapp1-two.vercel.app/api/save-recipe', {
         recipe: generatedRecipe,
         formData,
         title,
+        user_id, // uid を送信
       });
-      Alert.alert('Success', response.data.message);
-      setModalOpen(false);
+  
+      if (response.status === 200) {
+        Alert.alert('成功', response.data.message);
+        setModalOpen(false);
+      } else {
+        Alert.alert('エラー', 'レシピの保存に失敗しました。');
+      }
     } catch (err) {
       console.error('Error saving recipe:', err);
-      Alert.alert('Error', 'レシピの保存中にエラーが発生しました。');
+      Alert.alert('エラー', 'レシピの保存中にエラーが発生しました。');
     }
   };
 
@@ -205,8 +234,16 @@ const RecipeFormExtended = () => {
             onChangeText={(value) => handleInputChange('preferredIngredients', value)}
           />
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>レシピを探す 🚀</Text>
+            {isGenerating ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.submitButtonText}>レシピを探す 🚀</Text>
+            )}
           </TouchableOpacity>
+
+          {error && (
+            <Text style={styles.errorText}>{error}</Text>
+          )}
         </View>
 
         {generatedRecipe && (
@@ -270,6 +307,11 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 20, // 各セクションのマージン
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 10,
   },
 });
 

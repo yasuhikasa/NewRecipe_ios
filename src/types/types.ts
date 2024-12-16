@@ -11,4 +11,5 @@ export type RootStackParamList = {
   Contact: undefined;
   Dashboard: undefined;
   RecipeCreate: undefined;
+  Recipes: undefined;
 };
