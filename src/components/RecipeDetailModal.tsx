@@ -84,6 +84,7 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({ visible, recipeId
       const user_id = userData.user.id;
 
       // レシピ削除を実行
+      console.log('Deleting recipe:', recipeId);
       const response = await axios.delete(`https://recipeapp-096ac71f3c9b.herokuapp.com/api/recipes/${recipeId}`, {
         data: { user_id }, // user_id をリクエストボディに含める
       });

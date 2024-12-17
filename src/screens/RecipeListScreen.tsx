@@ -69,35 +69,9 @@ const RecipeListScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
 
   const handleDelete = async (id: string) => {
-    const { data, error } = await supabase.auth.getUser();
-
-    if (error) {
-      console.error('Error fetching user:', error.message);
-      Alert.alert('Error', 'ユーザー情報の取得に失敗しました。');
-      return;
-    }
-
-    if (!data.user) {
-      Alert.alert('Error', 'ユーザーが認証されていません。');
-      return;
-    }
-
-    try {
-      const response = await axios.delete(`https://recipeapp1-two.vercel.app/api/recipes/${id}`, {
-        data: { user_id: data.user.id }, // user_id を送信
-      });
-
-      if (response.status === 200) {
-        Alert.alert('Success', 'レシピが削除されました。');
-        fetchRecipes(data.user.id);
-        closeModal();
-      } else {
-        Alert.alert('Error', 'レシピの削除に失敗しました。');
-      }
-    } catch (err: any) {
-      console.error('Error deleting recipe:', err.message);
-      Alert.alert('Error', 'レシピの削除中にエラーが発生しました。');
-    }
+    // レシピリストから削除
+    setRecipes((prevRecipes) => prevRecipes.filter((recipe) => recipe.id !== id));
+    closeModal(); // モーダルを閉じる
   };
 
   const renderItem = ({ item }: { item: Recipe }) => (
