@@ -73,7 +73,7 @@ const [isAccountDeleteConfirmVisible, setIsAccountDeleteConfirmVisible] =
       }
 
       const response = await fetch(
-        'https://mail-backend-iota.vercel.app/api/newcare/AccountDelete',
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/AccountDelete',
         {
           method: 'POST',
           headers: {
@@ -218,7 +218,13 @@ const [isAccountDeleteConfirmVisible, setIsAccountDeleteConfirmVisible] =
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Welcome to the Dashboard!</Text>
-      
+      {/* ラベル管理画面への遷移ボタン */}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('LabelManagement')} // ラベル管理画面に遷移
+      >
+        <Text style={styles.buttonText}>ラベル管理へ</Text>
+      </TouchableOpacity>
       {/* レシピ作成画面への遷移ボタン */}
       <TouchableOpacity
         style={styles.button}

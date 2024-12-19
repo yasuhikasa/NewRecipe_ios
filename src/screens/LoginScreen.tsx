@@ -310,29 +310,29 @@ const LoginScreen: React.FC = () => {
       //   console.warn('レシートに original_transaction_id が含まれていません。');
       // }
 
-      // // 3. ユーザープロファイル作成
-      // if (data && data.user) {
-      //   const profileResponse = await fetch(
-      //     'https://mail-backend-iota.vercel.app/api/newcare/NewCareCreateUserProfiles',
-      //     {
-      //       method: 'POST',
-      //       headers: { 'Content-Type': 'application/json' },
-      //       body: JSON.stringify({
-      //         userId,
-      //         email,
-      //         // phoneNumber,
-      //         // originalTransactionId,
-      //       }),
-      //     },
-      //   );
+      // 3. ユーザープロファイル作成
+      if (data && data.user) {
+        const profileResponse = await fetch(
+          'https://recipeapp-096ac71f3c9b.herokuapp.com/api/NewCareCreateUserProfiles',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId,
+              email,
+              // phoneNumber,
+              // originalTransactionId,
+            }),
+          },
+        );
 
-      //   if (!profileResponse.ok) {
-      //     console.error(
-      //       'プロフィール作成エラー:',
-      //       await profileResponse.text(),
-      //     );
-      //   }
-      // }
+        if (!profileResponse.ok) {
+          console.error(
+            'プロフィール作成エラー:',
+            await profileResponse.text(),
+          );
+        }
+      }
 
       // // 4. サブスクリプション更新
       // if (receipt) {

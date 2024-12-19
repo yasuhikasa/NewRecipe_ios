@@ -1,9 +1,10 @@
 // src/components/RecipeDetailModal.tsx
 import React, { useCallback, useEffect, useState } from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { Modal, View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView, Switch } from 'react-native';
 import ReactMarkdown from 'react-native-markdown-display';
+import { fetchLabels, assignLabelToRecipe, removeLabelFromRecipe, getUser } from '../utils/api';
+import { Recipe, Label } from '../types/types';
 import axios from 'axios';
-import supabase from '../config/supabaseClient';
 
 type RecipeDetailModalProps = {
   visible: boolean;
@@ -12,28 +13,26 @@ type RecipeDetailModalProps = {
   onDelete: (id: string) => void;
 };
 
-type Recipe = {
-  id: string;
-  title: string;
-  recipe: string; // Markdown content
-  form_data: any; // 必要に応じて型を調整
-  created_at: string;
-  updated_at: string;
-};
-
 const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({ visible, recipeId, onClose, onDelete }) => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [labels, setLabels] = useState<Label[]>([]);
+  const [recipeLabels, setRecipeLabels] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
-  
+  const [isUpdatingLabels, setIsUpdatingLabels] = useState<boolean>(false);
 
   const fetchRecipeDetails = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`https://recipeapp-096ac71f3c9b.herokuapp.com/api/recipes/${recipeId}`);
-  
+      const user = await getUser();
+      const response = await axios.get(`https://recipeapp-096ac71f3c9b.herokuapp.com/api/recipes/${recipeId}`, {
+        params: { user_id: user.id },
+      });
+
       if (response.status === 200) {
-        setRecipe(response.data.recipe);
+        const fetchedRecipe: Recipe = response.data.recipe;
+        setRecipe(fetchedRecipe);
+        setRecipeLabels(fetchedRecipe.labels.map((label: Label) => label.id));
       } else {
         Alert.alert('Error', 'レシピの取得に失敗しました。');
         onClose();
@@ -46,13 +45,24 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({ visible, recipeId
       setLoading(false);
     }
   }, [recipeId, onClose]);
-  
+
+  const loadLabels = useCallback(async () => {
+    try {
+      const user = await getUser();
+      const fetchedLabels = await fetchLabels(user.id);
+      setLabels(fetchedLabels);
+    } catch (error: any) {
+      console.error('Error fetching labels:', error.message);
+      Alert.alert('Error', error.message);
+    }
+  }, []);
+
   useEffect(() => {
     if (visible && recipeId) {
       fetchRecipeDetails();
+      loadLabels();
     }
-  }, [visible, recipeId, fetchRecipeDetails]);
-  
+  }, [visible, recipeId, fetchRecipeDetails, loadLabels]);
 
   const handleDelete = () => {
     Alert.alert(
@@ -60,7 +70,7 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({ visible, recipeId
       '本当にこのレシピを削除してもよろしいですか？',
       [
         { text: 'キャンセル', style: 'cancel' },
-        { text: '削除', style: 'destructive', onPress: confirmDelete },
+        { text: '削除', style: 'destructive', onPress: () => confirmDelete() },
       ]
     );
   };
@@ -68,25 +78,10 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({ visible, recipeId
   const confirmDelete = async () => {
     setIsDeleting(true);
     try {
-      // ユーザー情報を取得
-      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const user = await getUser();
 
-      if (userError) {
-        throw new Error(userError.message);
-      }
-
-      if (!userData.user) {
-        Alert.alert('Error', 'ユーザーが認証されていません。');
-        onClose();
-        return;
-      }
-
-      const user_id = userData.user.id;
-
-      // レシピ削除を実行
-      console.log('Deleting recipe:', recipeId);
       const response = await axios.delete(`https://recipeapp-096ac71f3c9b.herokuapp.com/api/recipes/${recipeId}`, {
-        data: { user_id }, // user_id をリクエストボディに含める
+        data: { user_id: user.id }, // user_id をリクエストボディに含める
       });
 
       if (response.status === 200) {
@@ -101,6 +96,26 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({ visible, recipeId
       Alert.alert('Error', 'レシピの削除中にエラーが発生しました。');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleToggleLabel = async (labelId: string) => {
+    const isAssigned = recipeLabels.includes(labelId);
+    setIsUpdatingLabels(true);
+
+    try {
+      if (isAssigned) {
+        await removeLabelFromRecipe(recipeId, labelId);
+        setRecipeLabels(prev => prev.filter(id => id !== labelId));
+      } else {
+        await assignLabelToRecipe(recipeId, labelId);
+        setRecipeLabels(prev => [...prev, labelId]);
+      }
+    } catch (error: any) {
+      console.error('Error updating labels:', error.message);
+      Alert.alert('Error', error.message);
+    } finally {
+      setIsUpdatingLabels(false);
     }
   };
 
@@ -125,23 +140,26 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({ visible, recipeId
           ) : (
             <>
               <ScrollView style={styles.contentContainer}>
-  <Text style={styles.title}>{recipe?.title}</Text>
-  <ReactMarkdown
-    style={{
-      body: styles.markdownBody,
-      heading1: styles.heading1,
-      heading2: styles.heading2,
-      heading3: styles.heading3,
-      heading4: styles.heading4,
-      listItem: styles.listItem,
-      strong: styles.strong,
-      em: styles.em,
-      blockquote: styles.blockquote,
-    }}
-  >
-    {recipe?.recipe || ''}
-  </ReactMarkdown>
-</ScrollView>
+                <Text style={styles.title}>{recipe?.title}</Text>
+                <ReactMarkdown style={mstyles}>{recipe?.recipe || ''}</ReactMarkdown>
+
+                {/* Labels Section */}
+                <View style={styles.labelsContainer}>
+                  <Text style={styles.labelsTitle}>カテゴリ:</Text>
+                  {labels.map(label => (
+                    <View key={label.id} style={styles.labelItem}>
+                      <Text style={styles.labelName}>{label.name}</Text>
+                      <Switch
+                        value={recipeLabels.includes(label.id)}
+                        onValueChange={() => handleToggleLabel(label.id)}
+                        disabled={isUpdatingLabels}
+                      />
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+
+              {/* Buttons */}
               <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.deleteButton} onPress={handleDelete} disabled={isDeleting}>
                   {isDeleting ? (
@@ -161,6 +179,46 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({ visible, recipeId
     </Modal>
   );
 };
+
+const mstyles = StyleSheet.create({
+  body: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#333',
+    marginBottom: 8,
+  },
+  heading1: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#ff6347',
+  },
+  heading2: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#ffa07a',
+  },
+  heading3: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#f08080',
+  },
+  heading4: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    marginTop: 6,
+    color: '#cd5c5c',
+  },
+  listItem: {
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 6,
+    color: '#333',
+  },
+});
 
 const styles = StyleSheet.create({
   overlay: {
@@ -198,6 +256,24 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     marginBottom: 12,
   },
+  labelsContainer: {
+    marginTop: 20,
+  },
+  labelsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  labelItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  labelName: {
+    fontSize: 16,
+    color: '#333',
+  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -223,59 +299,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  markdownBody: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#333',
-    marginBottom: 12,
-  },
-  heading1: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ff6347',
-    marginBottom: 12,
-  },
-  heading2: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ffa07a',
-    marginBottom: 10,
-  },
-  heading3: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#f08080',
-    marginBottom: 8,
-  },
-  heading4: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#cd5c5c',
-    marginBottom: 6,
-    marginTop: 6,
-  },
-  listItem: {
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 8,
-    color: '#333',
-  },
-  strong: {
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  em: {
-    fontStyle: 'italic',
-    color: '#555',
-  },
-  blockquote: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#ffa07a',
-    paddingLeft: 12,
-    fontStyle: 'italic',
-    marginBottom: 10,
-    color: '#555',
   },
 });
 

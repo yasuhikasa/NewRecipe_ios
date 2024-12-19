@@ -18,6 +18,7 @@ import { restoreSession } from './src/utils/restoreSession';
 import DashboardScreen from './src/screens/DashboardScreen';
 import RecipeCreateScreen from './src/screens/RecipeCreateScreen';
 import RecipeListScreen from './src/screens/RecipeListScreen';
+import LabelManagementScreen from './src/screens/LabelManagementScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -125,6 +126,7 @@ function App() {
           options={{ title: 'レシピを投稿' }}
         />
         <Stack.Screen name="Help" component={HelpScreen} options={{ title: '記録項目の説明' }} />
+        <Stack.Screen name="LabelManagement" component={LabelManagementScreen} />
         <Stack.Screen name="RecipeList" component={RecipeListScreen} options={{ title: '保存されたレシピ' }} />
       </Stack.Navigator>
     </NavigationContainer>

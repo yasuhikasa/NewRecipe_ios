@@ -150,7 +150,7 @@ const ContactScreen: React.FC<ContactScreenProps> = ({ navigation }) => {
 
             // メール送信用のリクエスト
             const response = await fetch(
-              'https://mail-backend-iota.vercel.app/api/newcare/send-email',
+              'https://recipeapp-096ac71f3c9b.herokuapp.com/api/send-email',
               {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
