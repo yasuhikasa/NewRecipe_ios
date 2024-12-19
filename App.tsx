@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './src/screens/LoginScreen';
 import ContactScreen from './src/screens/ContactScreen';
+import HelpScreen from './src/screens/HelpScreen';
 import { RootStackParamList } from './src/types/types';
 import supabase from './src/config/supabaseClient';
 import SubscriptionScreen from './src/screens/SubscriptionScreen';
@@ -123,6 +124,7 @@ function App() {
           component={RecipeCreateScreen}
           options={{ title: 'レシピを投稿' }}
         />
+        <Stack.Screen name="Help" component={HelpScreen} options={{ title: '記録項目の説明' }} />
         <Stack.Screen name="RecipeList" component={RecipeListScreen} options={{ title: '保存されたレシピ' }} />
       </Stack.Navigator>
     </NavigationContainer>
