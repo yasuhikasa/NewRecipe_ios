@@ -1,6 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, ScrollView, LayoutChangeEvent } from 'react-native';
-import { fetchRecipesWithLabels, getUser } from '../utils/api';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Modal,
+  TextInput,
+  Switch,
+} from 'react-native';
+import { fetchRecipesWithLabels, getUser, assignLabelToRecipe, removeLabelFromRecipe } from '../utils/api';
 import RecipeDetailModal from '../components/RecipeDetailModal';
 import { Recipe, Label } from '../types/types';
 
@@ -10,14 +21,17 @@ const RecipeListScreen: React.FC = () => {
   const [selectedLabelId, setSelectedLabelId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [labelContainerHeight, setLabelContainerHeight] = useState<number>(0); // ラベルセクションの高さ
+  const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
+  const [editRecipeName, setEditRecipeName] = useState<string>('');
+  const [editRecipeLabels, setEditRecipeLabels] = useState<string[]>([]);
+
+  const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
 
   const loadData = useCallback(async (labelId?: string | null) => {
     setLoading(true);
     try {
       const user = await getUser();
-      const { labels, recipes } = await fetchRecipesWithLabels(user.id, labelId || undefined);
+      const { labels = [], recipes = [] } = await fetchRecipesWithLabels(user.id, labelId || undefined);
       setLabels(labels);
       setRecipes(recipes);
     } catch (error: any) {
@@ -37,21 +51,75 @@ const RecipeListScreen: React.FC = () => {
     loadData(labelId);
   };
 
-  const handleDeleteRecipe = (id: string) => {
-    setRecipes((prev) => prev.filter((recipe) => recipe.id !== id));
-    setIsModalOpen(false);
-    Alert.alert('削除しました', 'レシピが正常に削除されました。');
+  const handleLongPressRecipe = (recipe: Recipe) => {
+    setEditRecipeName(recipe.title);
+    setEditRecipeLabels(recipe.labels?.map((label) => label.id) || []);
+    setSelectedRecipeId(recipe.id);
+    setEditModalVisible(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedRecipeId(null);
+  const handlePressRecipe = (recipeId: string) => {
+    setSelectedRecipeId(recipeId);
+    setDetailModalVisible(true);
   };
 
-  const onLabelContainerLayout = (e: LayoutChangeEvent) => {
-    const { height } = e.nativeEvent.layout;
-    setLabelContainerHeight(height); // ラベルセクションの高さを保存
+  const handleSaveEdit = async () => {
+    if (!selectedRecipeId) return;
+
+    try {
+      // レシピ名の更新
+      if (editRecipeName) {
+        const response = await fetch(
+          `https://recipeapp-096ac71f3c9b.herokuapp.com/api/recipes/${selectedRecipeId}`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: editRecipeName }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to update recipe title');
+        }
+      }
+
+      // ラベルの割り当て・削除
+      for (const label of labels) {
+        const isSelected = editRecipeLabels.includes(label.id);
+        const isAlreadyAssigned = recipes
+          .find((r) => r.id === selectedRecipeId)
+          ?.labels?.some((rLabel) => rLabel.id === label.id);
+
+        if (isSelected && !isAlreadyAssigned) {
+          await assignLabelToRecipe(selectedRecipeId, label.id);
+        } else if (!isSelected && isAlreadyAssigned) {
+          await removeLabelFromRecipe(selectedRecipeId, label.id);
+        }
+      }
+
+      Alert.alert('成功', 'レシピが更新されました。');
+      loadData(selectedLabelId);
+    } catch (error: any) {
+      console.error('Error updating recipe:', error.message);
+      Alert.alert('エラー', 'レシピの更新に失敗しました。');
+    } finally {
+      setEditModalVisible(false);
+    }
   };
+
+  const renderLabelItem = ({ label }: { label: Label }) => (
+    <View style={styles.labelItem}>
+      <Text style={styles.labelName}>{label.name}</Text>
+      <Switch
+        value={editRecipeLabels.includes(label.id)}
+        onValueChange={(value) => {
+          setEditRecipeLabels((prev) =>
+            value ? [...prev, label.id] : prev.filter((id) => id !== label.id)
+          );
+        }}
+      />
+    </View>
+  );
 
   if (loading) {
     return (
@@ -64,7 +132,7 @@ const RecipeListScreen: React.FC = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* ラベルセクション */}
-      <View onLayout={onLabelContainerLayout} style={styles.labelContainer}>
+      <View style={styles.labelContainer}>
         <View style={styles.labelContentContainer}>
           {[{ id: null, name: 'All' }, ...labels].map((label) => (
             <TouchableOpacity
@@ -89,10 +157,8 @@ const RecipeListScreen: React.FC = () => {
             <TouchableOpacity
               key={recipe.id}
               style={styles.recipeItem}
-              onPress={() => {
-                setSelectedRecipeId(recipe.id);
-                setIsModalOpen(true);
-              }}
+              onPress={() => handlePressRecipe(recipe.id)}
+              onLongPress={() => handleLongPressRecipe(recipe)}
             >
               <Text style={styles.recipeTitle}>{recipe.title}</Text>
             </TouchableOpacity>
@@ -103,88 +169,68 @@ const RecipeListScreen: React.FC = () => {
       {/* レシピ詳細モーダル */}
       {selectedRecipeId && (
         <RecipeDetailModal
-          visible={isModalOpen}
+          visible={detailModalVisible}
           recipeId={selectedRecipeId}
-          onClose={closeModal}
-          onDelete={handleDeleteRecipe}
+          onClose={() => setDetailModalVisible(false)}
+          onDelete={() => {
+            setRecipes((prev) => prev.filter((recipe) => recipe.id !== selectedRecipeId));
+            setDetailModalVisible(false);
+          }}
         />
       )}
+
+      {/* 編集モーダル */}
+      <Modal visible={editModalVisible} transparent={true} animationType="slide">
+        <View style={styles.overlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>レシピを編集</Text>
+            <TextInput
+              style={styles.input}
+              value={editRecipeName}
+              onChangeText={setEditRecipeName}
+              placeholder="レシピ名を入力"
+            />
+            <ScrollView>
+              {labels.map((label) => renderLabelItem({ label }))}
+            </ScrollView>
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.saveButton} onPress={handleSaveEdit}>
+                <Text style={styles.buttonText}>保存</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => setEditModalVisible(false)}>
+                <Text style={styles.buttonText}>キャンセル</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1, // ScrollView の中身が親コンテナにフィットするように調整
-    padding: 16,
-    backgroundColor: '#f8f8f8',
-  },
-  labelContainer: {
-    marginBottom: 16,
-  },
-  labelContentContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap', // ラベルが折り返すように設定
-    justifyContent: 'flex-start', // 左寄せ
-    alignItems: 'flex-start', // 上寄せ
-  },
-  label: {
-    height: 40, // 明示的に高さを指定
-    minWidth: 80, // ボタンの最小幅を設定
-    paddingHorizontal: 14, // 横の余白を設定
-    backgroundColor: '#e0e0e0', // デフォルト背景色
-    borderRadius: 20, // 丸みを強調
-    marginHorizontal: 6, // ボタン間の間隔
-    marginVertical: 6, // ボタンの上下間隔を追加
-    borderWidth: 1, // ボーダーを追加
-    borderColor: '#ccc', // ボーダー色
-    justifyContent: 'center', // テキストを垂直方向で中央揃え
-    alignItems: 'center', // テキストを水平方向で中央揃え
-  },
-  selectedLabel: {
-    backgroundColor: '#ff6347', // 選択時の背景色
-    borderColor: '#ff6347', // 選択時のボーダー色
-  },
-  labelText: {
-    color: '#333', // デフォルト文字色
-    fontSize: 14, // ボタンに合わせた文字サイズ
-    fontWeight: '500', // 中くらいの太さ
-  },
-  selectedLabelText: {
-    color: '#fff', // 選択時の文字色
-  },
-  recipeContainer: {
-    paddingBottom: 20,
-  },
-  recipeItem: {
-    padding: 20,
-    backgroundColor: '#ffffff',
-    borderRadius: 15,
-    marginBottom: 16,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    borderWidth: 1,
-    borderColor: '#e5e5e5',
-  },
-  recipeTitle: {
-    fontSize: 18,
-    color: '#333',
-    fontWeight: 'bold',
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    textAlign: 'center',
-    marginTop: 20,
-    fontSize: 16,
-    color: '#777',
-  },
+  container: { flexGrow: 1, padding: 16, backgroundColor: '#f8f8f8' },
+  labelContainer: { marginBottom: 16 },
+  labelContentContainer: { flexDirection: 'row', flexWrap: 'wrap' },
+  label: { padding: 10, backgroundColor: '#e0e0e0', borderRadius: 8, margin: 5 },
+  selectedLabel: { backgroundColor: '#ff6347' },
+  labelText: { color: '#333' },
+  selectedLabelText: { color: '#fff' },
+  recipeContainer: { paddingBottom: 20 },
+  recipeItem: { padding: 20, backgroundColor: '#ffffff', borderRadius: 15, marginBottom: 16 },
+  recipeTitle: { fontSize: 18, color: '#333' },
+  overlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center' },
+  modalContainer: { backgroundColor: '#fff', borderRadius: 8, padding: 16, width: '90%', maxHeight: '80%' },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 16 },
+  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, marginBottom: 16 },
+  modalActions: { flexDirection: 'row', justifyContent: 'space-between' },
+  saveButton: { backgroundColor: '#4CAF50', padding: 12, borderRadius: 8 },
+  cancelButton: { backgroundColor: '#f44336', padding: 12, borderRadius: 8 },
+  buttonText: { color: '#fff', fontWeight: 'bold', textAlign: 'center' },
+  labelItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  labelName: { fontSize: 16 },
+  loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyText: { textAlign: 'center', marginTop: 20, fontSize: 16, color: '#777' },
 });
 
 export default RecipeListScreen;
