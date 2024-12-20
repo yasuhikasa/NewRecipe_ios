@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { fetchRecipesWithLabels, getUser, assignLabelToRecipe, removeLabelFromRecipe } from '../utils/api';
 import RecipeDetailModal from '../components/RecipeDetailModal';
+import RecipeLabelModal from '../components/RecipeLabelModal';
 import { Recipe, Label } from '../types/types';
 
 const RecipeListScreen: React.FC = () => {
@@ -63,63 +64,9 @@ const RecipeListScreen: React.FC = () => {
     setDetailModalVisible(true);
   };
 
-  const handleSaveEdit = async () => {
-    if (!selectedRecipeId) return;
 
-    try {
-      // レシピ名の更新
-      if (editRecipeName) {
-        const response = await fetch(
-          `https://recipeapp-096ac71f3c9b.herokuapp.com/api/recipes/${selectedRecipeId}`,
-          {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: editRecipeName }),
-          }
-        );
 
-        if (!response.ok) {
-          throw new Error('Failed to update recipe title');
-        }
-      }
 
-      // ラベルの割り当て・削除
-      for (const label of labels) {
-        const isSelected = editRecipeLabels.includes(label.id);
-        const isAlreadyAssigned = recipes
-          .find((r) => r.id === selectedRecipeId)
-          ?.labels?.some((rLabel) => rLabel.id === label.id);
-
-        if (isSelected && !isAlreadyAssigned) {
-          await assignLabelToRecipe(selectedRecipeId, label.id);
-        } else if (!isSelected && isAlreadyAssigned) {
-          await removeLabelFromRecipe(selectedRecipeId, label.id);
-        }
-      }
-
-      Alert.alert('成功', 'レシピが更新されました。');
-      loadData(selectedLabelId);
-    } catch (error: any) {
-      console.error('Error updating recipe:', error.message);
-      Alert.alert('エラー', 'レシピの更新に失敗しました。');
-    } finally {
-      setEditModalVisible(false);
-    }
-  };
-
-  const renderLabelItem = ({ label }: { label: Label }) => (
-    <View style={styles.labelItem}>
-      <Text style={styles.labelName}>{label.name}</Text>
-      <Switch
-        value={editRecipeLabels.includes(label.id)}
-        onValueChange={(value) => {
-          setEditRecipeLabels((prev) =>
-            value ? [...prev, label.id] : prev.filter((id) => id !== label.id)
-          );
-        }}
-      />
-    </View>
-  );
 
   if (loading) {
     return (
@@ -180,30 +127,16 @@ const RecipeListScreen: React.FC = () => {
       )}
 
       {/* 編集モーダル */}
-      <Modal visible={editModalVisible} transparent={true} animationType="slide">
-        <View style={styles.overlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>レシピを編集</Text>
-            <TextInput
-              style={styles.input}
-              value={editRecipeName}
-              onChangeText={setEditRecipeName}
-              placeholder="レシピ名を入力"
-            />
-            <ScrollView>
-              {labels.map((label) => renderLabelItem({ label }))}
-            </ScrollView>
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.saveButton} onPress={handleSaveEdit}>
-                <Text style={styles.buttonText}>保存</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.cancelButton} onPress={() => setEditModalVisible(false)}>
-                <Text style={styles.buttonText}>キャンセル</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <RecipeLabelModal
+  visible={editModalVisible}
+  recipeId={selectedRecipeId!} // selectedRecipeIdがnullでないことを保証
+  onSaved={() => {
+    loadData(selectedLabelId); // 保存後にリストをリロード
+    setEditModalVisible(false);
+  }}
+  onClose={() => setEditModalVisible(false)}
+/>
+
     </ScrollView>
   );
 };

@@ -79,22 +79,50 @@ export const fetchRecipes = async (user_id: string, label_id?: string): Promise<
   }
 };
 
+// 割り当て済みのラベルを取得
+export const fetchAssignedLabels = async (recipeId: string): Promise<Label[]> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/recipes/${recipeId}/labels`);
+    return response.data.labels;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error fetching assigned labels:', error.response?.data);
+    }
+    throw error;
+  }
+};
 
 // レシピにラベルを割り当てる
 export const assignLabelToRecipe = async (recipeId: string, labelId: string): Promise<void> => {
-  const response = await axios.post(`${API_BASE_URL}/recipes/${recipeId}/labels`, { label_id: labelId });
+  try {
+    const response = await axios.post(`${API_BASE_URL}/recipes/${recipeId}/labels`, { label_id: labelId });
 
-  if (response.status !== 200) {
-    throw new Error('ラベルの割り当てに失敗しました。');
+    if (response.status !== 200) {
+      throw new Error(`Failed to assign label ${labelId} to recipe ${recipeId}`);
+    }
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error in assignLabelToRecipe:', error.response?.data);
+    }
+    throw error;
   }
 };
 
 // レシピからラベルを削除する
 export const removeLabelFromRecipe = async (recipeId: string, labelId: string): Promise<void> => {
-  const response = await axios.delete(`${API_BASE_URL}/recipes/${recipeId}/labels/${labelId}`);
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/recipes/${recipeId}/labels`, {
+      data: { label_id: labelId },
+    });
 
-  if (response.status !== 200) {
-    throw new Error('ラベルの削除に失敗しました。');
+    if (response.status !== 200) {
+      throw new Error(`Failed to remove label ${labelId} from recipe ${recipeId}`);
+    }
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error in removeLabelFromRecipe:', error.response?.data);
+    }
+    throw error;
   }
 };
 
