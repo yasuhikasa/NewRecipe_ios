@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { View, Alert, StyleSheet } from 'react-native';
+import { View, Alert, StyleSheet, useWindowDimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppleAuthentication from '@invertase/react-native-apple-authentication';
 import supabase from '../config/supabaseClient';
@@ -20,6 +20,10 @@ type LoginScreenNavigationProp = StackNavigationProp<
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const { width } = useWindowDimensions();  // 画面の幅を取得
+
+  // iPadや大きな画面用にボタンのサイズを調整
+  const appleButtonWidth = width > 600 ? 320 : 200;
 
   const handleAppleSignIn = async () => {
     try {
@@ -119,13 +123,15 @@ const LoginScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Appleでサインインボタン */}
-      <AppleButton
-        style={styles.appleButton}
-        buttonType={AppleButton.Type.SIGN_IN}
-        buttonStyle={AppleButton.Style.WHITE}
-        onPress={handleAppleSignIn}
-      />
+      <View style={styles.appleButtonContainer}>
+        {/* Appleサインインボタン */}
+        <AppleButton
+          style={[styles.appleButton, { width: appleButtonWidth }]}  // 幅を動的に設定
+          buttonType={AppleButton.Type.SIGN_IN}
+          buttonStyle={AppleButton.Style.WHITE}
+          onPress={handleAppleSignIn}
+        />
+      </View>
     </View>
   );
 };
@@ -136,9 +142,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFF8E1',
   },
+  appleButtonContainer: {
+    borderWidth: 1, // 枠線の太さ
+    borderColor: 'black', // 枠線の色
+    borderRadius: 5, // 角丸
+  },
   appleButton: {
-    width: 300,
-    height: 60,
+    width: 200,
+    height: 44,
+    borderRadius: 5, // ボタンの角も丸める
   },
 });
 
