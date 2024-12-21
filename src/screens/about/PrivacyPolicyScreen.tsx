@@ -118,5 +118,4 @@ const PrivacyPolicyScreen: React.FC = () => {
   );
 };
 
-
 export default PrivacyPolicyScreen;

@@ -627,7 +627,6 @@ const LoginScreen: React.FC = () => {
           新規登録、ログインにお困りの方へ
         </Text>
         {/* テスト用のログイン画面 */}
-
       </ScrollView>
 
       {/* OTPモーダル */}

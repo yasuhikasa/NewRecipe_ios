@@ -7,14 +7,12 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  Modal,
-  TextInput,
-  Switch,
 } from 'react-native';
-import { fetchRecipesWithLabels, getUser, assignLabelToRecipe, removeLabelFromRecipe } from '../utils/api';
+import { fetchRecipesWithLabels, getUser } from '../utils/api';
 import RecipeDetailModal from '../components/RecipeDetailModal';
 import RecipeLabelModal from '../components/RecipeLabelModal';
 import { Recipe, Label } from '../types/types';
+import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
 const RecipeListScreen: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -25,14 +23,80 @@ const RecipeListScreen: React.FC = () => {
   const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
   const [editRecipeName, setEditRecipeName] = useState<string>('');
   const [editRecipeLabels, setEditRecipeLabels] = useState<string[]>([]);
+  const { isLandscape, isLargeScreen } = useDeviceOrientation();
 
   const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
+
+  const styles = StyleSheet.create({
+    container: {
+      flexGrow: 1,
+      padding: isLargeScreen ? (isLandscape ? 50 : 40) : 16,
+      backgroundColor: '#f8f8f8',
+    },
+    labelContainer: {
+      marginBottom: isLargeScreen ? 24 : 16,
+    },
+    labelContentContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: isLargeScreen ? 'center' : 'flex-start',
+    },
+    label: {
+      padding: isLargeScreen ? 14 : 10,
+      backgroundColor: '#e0e0e0',
+      borderRadius: 8,
+      margin: isLargeScreen ? 10 : 5,
+    },
+    selectedLabel: {
+      backgroundColor: '#ff6347',
+    },
+    labelText: {
+      color: '#333',
+      fontSize: isLargeScreen ? 18 : 14,
+    },
+    selectedLabelText: {
+      color: '#fff',
+    },
+    recipeContainer: {
+      paddingBottom: isLargeScreen ? 40 : 20,
+    },
+    recipeItem: {
+      padding: isLargeScreen ? 24 : 20,
+      backgroundColor: '#ffffff',
+      borderRadius: 15,
+      marginBottom: isLargeScreen ? 20 : 16,
+      elevation: 5,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 6,
+    },
+    recipeTitle: {
+      fontSize: isLargeScreen ? 20 : 18,
+      color: '#333',
+      fontWeight: 'bold',
+    },
+    loaderContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    emptyText: {
+      textAlign: 'center',
+      marginTop: isLargeScreen ? 30 : 20,
+      fontSize: isLargeScreen ? 18 : 16,
+      color: '#777',
+    },
+  });
 
   const loadData = useCallback(async (labelId?: string | null) => {
     setLoading(true);
     try {
       const user = await getUser();
-      const { labels = [], recipes = [] } = await fetchRecipesWithLabels(user.id, labelId || undefined);
+      const { labels = [], recipes = [] } = await fetchRecipesWithLabels(
+        user.id,
+        labelId || undefined,
+      );
       setLabels(labels);
       setRecipes(recipes);
     } catch (error: any) {
@@ -54,7 +118,7 @@ const RecipeListScreen: React.FC = () => {
 
   const handleLongPressRecipe = (recipe: Recipe) => {
     setEditRecipeName(recipe.title);
-    setEditRecipeLabels(recipe.labels?.map((label) => label.id) || []);
+    setEditRecipeLabels(recipe.labels?.map((label) => String(label.id)) || []); // 数値から文字列へ変換
     setSelectedRecipeId(recipe.id);
     setEditModalVisible(true);
   };
@@ -63,10 +127,6 @@ const RecipeListScreen: React.FC = () => {
     setSelectedRecipeId(recipeId);
     setDetailModalVisible(true);
   };
-
-
-
-
 
   if (loading) {
     return (
@@ -84,10 +144,22 @@ const RecipeListScreen: React.FC = () => {
           {[{ id: null, name: 'All' }, ...labels].map((label) => (
             <TouchableOpacity
               key={label.id || 'all'}
-              style={[styles.label, selectedLabelId === label.id && styles.selectedLabel]}
-              onPress={() => handleLabelClick(label.id || null)}
+              style={[
+                styles.label,
+                selectedLabelId === (label.id ? String(label.id) : null) &&
+                  styles.selectedLabel,
+              ]}
+              onPress={() =>
+                handleLabelClick(label.id !== null ? String(label.id) : null)
+              }
             >
-              <Text style={[styles.labelText, selectedLabelId === label.id && styles.selectedLabelText]}>
+              <Text
+                style={[
+                  styles.labelText,
+                  selectedLabelId === (label.id ? String(label.id) : null) &&
+                    styles.selectedLabelText,
+                ]}
+              >
                 {label.name}
               </Text>
             </TouchableOpacity>
@@ -98,7 +170,9 @@ const RecipeListScreen: React.FC = () => {
       {/* レシピセクション */}
       <View style={styles.recipeContainer}>
         {recipes.length === 0 ? (
-          <Text style={styles.emptyText}>ラベルに関連するレシピがありません。</Text>
+          <Text style={styles.emptyText}>
+            ラベルに関連するレシピがありません。
+          </Text>
         ) : (
           recipes.map((recipe) => (
             <TouchableOpacity
@@ -120,7 +194,9 @@ const RecipeListScreen: React.FC = () => {
           recipeId={selectedRecipeId}
           onClose={() => setDetailModalVisible(false)}
           onDelete={() => {
-            setRecipes((prev) => prev.filter((recipe) => recipe.id !== selectedRecipeId));
+            setRecipes((prev) =>
+              prev.filter((recipe) => recipe.id !== selectedRecipeId),
+            );
             setDetailModalVisible(false);
           }}
         />
@@ -128,42 +204,16 @@ const RecipeListScreen: React.FC = () => {
 
       {/* 編集モーダル */}
       <RecipeLabelModal
-  visible={editModalVisible}
-  recipeId={selectedRecipeId!} // selectedRecipeIdがnullでないことを保証
-  onSaved={() => {
-    loadData(selectedLabelId); // 保存後にリストをリロード
-    setEditModalVisible(false);
-  }}
-  onClose={() => setEditModalVisible(false)}
-/>
-
+        visible={editModalVisible}
+        recipeId={selectedRecipeId!} // selectedRecipeIdがnullでないことを保証
+        onSaved={() => {
+          loadData(selectedLabelId); // 保存後にリストをリロード
+          setEditModalVisible(false);
+        }}
+        onClose={() => setEditModalVisible(false)}
+      />
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flexGrow: 1, padding: 16, backgroundColor: '#f8f8f8' },
-  labelContainer: { marginBottom: 16 },
-  labelContentContainer: { flexDirection: 'row', flexWrap: 'wrap' },
-  label: { padding: 10, backgroundColor: '#e0e0e0', borderRadius: 8, margin: 5 },
-  selectedLabel: { backgroundColor: '#ff6347' },
-  labelText: { color: '#333' },
-  selectedLabelText: { color: '#fff' },
-  recipeContainer: { paddingBottom: 20 },
-  recipeItem: { padding: 20, backgroundColor: '#ffffff', borderRadius: 15, marginBottom: 16 },
-  recipeTitle: { fontSize: 18, color: '#333' },
-  overlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center' },
-  modalContainer: { backgroundColor: '#fff', borderRadius: 8, padding: 16, width: '90%', maxHeight: '80%' },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 16 },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, marginBottom: 16 },
-  modalActions: { flexDirection: 'row', justifyContent: 'space-between' },
-  saveButton: { backgroundColor: '#4CAF50', padding: 12, borderRadius: 8 },
-  cancelButton: { backgroundColor: '#f44336', padding: 12, borderRadius: 8 },
-  buttonText: { color: '#fff', fontWeight: 'bold', textAlign: 'center' },
-  labelItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  labelName: { fontSize: 16 },
-  loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyText: { textAlign: 'center', marginTop: 20, fontSize: 16, color: '#777' },
-});
 
 export default RecipeListScreen;

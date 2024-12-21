@@ -35,10 +35,15 @@ export const fetchLabels = async (user_id: string): Promise<Label[]> => {
   }
 };
 
-
 // ラベル追加
-export const addLabel = async (user_id: string, name: string): Promise<Label> => {
-  const response = await axios.post(`${API_BASE_URL}/labels`, { user_id, name });
+export const addLabel = async (
+  user_id: string,
+  name: string,
+): Promise<Label> => {
+  const response = await axios.post(`${API_BASE_URL}/labels`, {
+    user_id,
+    name,
+  });
 
   if (response.status === 201) {
     return response.data.label;
@@ -57,7 +62,10 @@ export const deleteLabel = async (label_id: string): Promise<void> => {
 };
 
 // レシピ取得（オプションでラベルフィルタ）
-export const fetchRecipes = async (user_id: string, label_id?: string): Promise<Recipe[]> => {
+export const fetchRecipes = async (
+  user_id: string,
+  label_id?: string,
+): Promise<Recipe[]> => {
   const params: Record<string, string | undefined> = { user_id };
   if (label_id) {
     params.label_id = label_id;
@@ -80,61 +88,98 @@ export const fetchRecipes = async (user_id: string, label_id?: string): Promise<
 };
 
 // 割り当て済みのラベルを取得
-export const fetchAssignedLabels = async (recipeId: string): Promise<Label[]> => {
+export const fetchAssignedLabels = async (
+  recipeId: string,
+): Promise<Label[]> => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/recipes/${recipeId}/labels`);
-    return response.data.labels;
+    const response = await axios.get(
+      `${API_BASE_URL}/recipes/${recipeId}/labels`,
+    );
+    console.log('FetchAssignedLabels Response:', response.data);
+
+    // サーバーからのレスポンス型を明示的に定義
+    const labels = response.data.labels as {
+      label_id: number;
+      labels: { name: string };
+    }[];
+
+    // 重複を排除するために Set を使用
+    const uniqueLabels = Array.from(
+      new Map(
+        labels.map((label) => [
+          label.label_id,
+          { id: label.label_id, name: label.labels.name },
+        ]),
+      ).values(),
+    );
+
+    console.log('Unique Labels:', uniqueLabels);
+    return uniqueLabels; // 重複を取り除いた結果を返す
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
-      console.error('Error fetching assigned labels:', error.response?.data);
+      if (error.response?.status === 404) {
+        console.warn('ラベルが見つかりませんでした。空配列を返します。');
+        return [];
+      }
+      console.error('割り当て済みラベルの取得エラー:', error.response?.data);
     }
-    throw error;
+    console.error('不明なエラー:', error);
+    return [];
   }
 };
 
 // レシピにラベルを割り当てる
-export const assignLabelToRecipe = async (recipeId: string, labelId: string): Promise<void> => {
+export const assignLabelToRecipe = async (
+  recipeId: string,
+  labelId: string,
+): Promise<void> => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/recipes/${recipeId}/labels`, { label_id: labelId });
+    console.log('Sending POST request to Heroku:', {
+      recipeId,
+      labelId,
+    });
+    const response = await axios.post(
+      `${API_BASE_URL}/recipes/${recipeId}/labels`,
+      { label_id: labelId },
+    );
 
     if (response.status !== 200) {
-      throw new Error(`Failed to assign label ${labelId} to recipe ${recipeId}`);
+      throw new Error(
+        `Failed to assign label ${labelId} to recipe ${recipeId}`,
+      );
     }
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error('Error in assignLabelToRecipe:', error.response?.data);
     }
-    throw error;
+    throw error; // エラーを上位で処理
   }
 };
 
 // レシピからラベルを削除する
-export const removeLabelFromRecipe = async (recipeId: string, labelId: string): Promise<void> => {
-  try {
-    const response = await axios.delete(`${API_BASE_URL}/recipes/${recipeId}/labels`, {
-      data: { label_id: labelId },
-    });
-
-    if (response.status !== 200) {
-      throw new Error(`Failed to remove label ${labelId} from recipe ${recipeId}`);
-    }
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error in removeLabelFromRecipe:', error.response?.data);
-    }
-    throw error;
-  }
+export const removeLabelFromRecipe = async (
+  recipeId: string,
+  labelId: string,
+): Promise<void> => {
+  await axios.delete(`${API_BASE_URL}/recipes/${recipeId}/labels`, {
+    data: { label_id: labelId },
+  });
 };
 
 // 統合されたデータを取得
-export const fetchRecipesWithLabels = async (user_id: string, label_id?: string): Promise<{ labels: Label[]; recipes: Recipe[] }> => {
+export const fetchRecipesWithLabels = async (
+  user_id: string,
+  label_id?: string,
+): Promise<{ labels: Label[]; recipes: Recipe[] }> => {
   const params: Record<string, string | undefined> = { user_id };
   if (label_id) {
     params.label_id = label_id;
   }
 
   try {
-    const response = await axios.get(`${API_BASE_URL}/recipesWithLabels`, { params });
+    const response = await axios.get(`${API_BASE_URL}/recipesWithLabels`, {
+      params,
+    });
 
     if (response.status === 200) {
       const { recipes, labels } = response.data;
@@ -147,5 +192,3 @@ export const fetchRecipesWithLabels = async (user_id: string, label_id?: string)
     throw new Error('データの取得に失敗しました');
   }
 };
-
-

@@ -21,10 +21,7 @@ import { RootStackParamList } from '../types/types';
 import supabase from '../config/supabaseClient';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
-type NavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'Subscription'
->;
+type NavigationProp = StackNavigationProp<RootStackParamList, 'Subscription'>;
 
 const SubscriptionScreen: React.FC = () => {
   const [subscriptionActive, setSubscriptionActive] = useState<boolean>(false);
@@ -194,10 +191,7 @@ const SubscriptionScreen: React.FC = () => {
       }
     } catch (error) {
       console.error('購入エラー:', error);
-      Alert.alert(
-        'エラー',
-        `購入処理中に問題が発生しました`,
-      );
+      Alert.alert('エラー', `購入処理中に問題が発生しました`);
     } finally {
       setLoading(false);
     }

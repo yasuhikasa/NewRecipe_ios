@@ -20,12 +20,12 @@ import {
   mealTimeOptions,
   budgetOptions,
   peopleOptions,
-  preferenceOptions,
 } from '../utils/options';
 import RecipeModal from './RecipeModal'; // 別ファイルからインポート
 import CustomCheckbox from './CustomCheckbox'; // カスタムチェックボックス
 import CustomSelect from './CustomSelect'; // カスタムセレクトボックス
 import supabase from '../config/supabaseClient';
+import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
 // フォームデータの型定義
 type FormData = {
@@ -62,6 +62,64 @@ const RecipeFormExtended = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isLargeScreen, isLandscape } = useDeviceOrientation();
+
+  const styles = StyleSheet.create({
+    container: {
+      padding: isLargeScreen ? (isLandscape ? 32 : 24) : 16,
+      flexGrow: 1,
+      backgroundColor: '#fffaf0',
+    },
+    innerContainer: {
+      padding: isLargeScreen ? 24 : 20,
+      borderRadius: 8,
+      backgroundColor: '#fff',
+      marginBottom: isLargeScreen ? 30 : 20,
+    },
+    title: {
+      fontSize: isLargeScreen ? 28 : 24,
+      fontWeight: 'bold',
+      marginBottom: isLargeScreen ? 20 : 16,
+      textAlign: 'center',
+      color: '#ff6347',
+    },
+    label: {
+      fontSize: isLargeScreen ? 18 : 16,
+      fontWeight: '600',
+      marginBottom: isLargeScreen ? 10 : 8,
+      color: '#333',
+    },
+    input: {
+      borderWidth: 1,
+      padding: isLargeScreen ? 14 : 10,
+      borderRadius: 8,
+      marginBottom: isLargeScreen ? 20 : 16,
+      backgroundColor: '#fff',
+      borderColor: '#ccc',
+    },
+    submitButton: {
+      backgroundColor: '#ff6347',
+      padding: isLargeScreen ? 18 : 16,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginTop: isLargeScreen ? 24 : 16,
+    },
+    submitButtonText: {
+      textAlign: 'center',
+      color: '#fff',
+      fontSize: isLargeScreen ? 18 : 16,
+      fontWeight: 'bold',
+    },
+    section: {
+      marginBottom: isLargeScreen ? 30 : 20,
+    },
+    errorText: {
+      color: 'red',
+      textAlign: 'center',
+      marginTop: 10,
+      fontSize: isLargeScreen ? 16 : 14,
+    },
+  });
 
   // セレクトボックスの変更ハンドラー
   const handleSelectChange = (name: keyof FormData, value: string) => {
@@ -72,13 +130,20 @@ const RecipeFormExtended = () => {
   };
 
   // チェックボックスの変更ハンドラー
-  const handleCheckboxChange = (name: keyof FormData, value: string, checked: boolean) => {
+  const handleCheckboxChange = (
+    name: keyof FormData,
+    value: string,
+    checked: boolean,
+  ) => {
     setFormData((prev) => {
       const currentArray = prev[name] as string[];
       if (checked) {
         return { ...prev, [name]: [...currentArray, value] };
       } else {
-        return { ...prev, [name]: currentArray.filter((item) => item !== value) };
+        return {
+          ...prev,
+          [name]: currentArray.filter((item) => item !== value),
+        };
       }
     });
   };
@@ -98,11 +163,15 @@ const RecipeFormExtended = () => {
       setGeneratedRecipe(''); // 初期化
       setModalOpen(true); // モーダルを先に開く
 
-      const response = await axios.post('https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-recipe', formData, {
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await axios.post(
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-recipe',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
 
       console.log('API Response:', response.data);
 
@@ -143,19 +212,25 @@ const RecipeFormExtended = () => {
       } = await supabase.auth.getUser();
 
       if (!user || !user.id) {
-        Alert.alert('エラー', 'ユーザーが認証されていません。ログインしてください。');
+        Alert.alert(
+          'エラー',
+          'ユーザーが認証されていません。ログインしてください。',
+        );
         return;
       }
 
       const user_id = user.id;
 
       // サーバーにレシピデータを送信
-      const response = await axios.post('https://recipeapp-096ac71f3c9b.herokuapp.com/api/save-recipe', {
-        recipe: generatedRecipe,
-        formData,
-        title,
-        user_id, // uid を送信
-      });
+      const response = await axios.post(
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/save-recipe',
+        {
+          recipe: generatedRecipe,
+          formData,
+          title,
+          user_id, // uid を送信
+        },
+      );
 
       if (response.status === 200) {
         Alert.alert('成功', response.data.message);
@@ -176,7 +251,10 @@ const RecipeFormExtended = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.innerContainer}>
           <Text style={styles.title}>🍳 あなたのこだわりレシピを探そう</Text>
 
@@ -233,7 +311,9 @@ const RecipeFormExtended = () => {
             style={styles.input}
             placeholder="使いたい食材 🥕 (例: 鶏肉, トマト)"
             value={formData.preferredIngredients}
-            onChangeText={(value) => handleInputChange('preferredIngredients', value)}
+            onChangeText={(value) =>
+              handleInputChange('preferredIngredients', value)
+            }
           />
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             {isGenerating ? (
@@ -243,9 +323,7 @@ const RecipeFormExtended = () => {
             )}
           </TouchableOpacity>
 
-          {error && (
-            <Text style={styles.errorText}>{error}</Text>
-          )}
+          {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
 
         {/* ストリーミングされたレシピを表示するためのモーダル */}
@@ -263,59 +341,5 @@ const RecipeFormExtended = () => {
     </TouchableWithoutFeedback>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    flexGrow: 1,
-    backgroundColor: '#fffaf0',
-  },
-  innerContainer: {
-    padding: 20,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-    color: '#ff6347',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
-  },
-  input: {
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 16,
-    backgroundColor: '#fff',
-    borderColor: '#ccc',
-  },
-  submitButton: {
-    backgroundColor: '#ff6347',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  submitButtonText: {
-    textAlign: 'center',
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  section: {
-    marginBottom: 20, // 各セクションのマージン
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 10,
-  },
-});
 
 export default RecipeFormExtended;

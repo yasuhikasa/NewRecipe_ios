@@ -70,9 +70,7 @@ function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName={isLoggedIn ? 'Dashboard' : 'Login'}
-      >
+      <Stack.Navigator initialRouteName={isLoggedIn ? 'Dashboard' : 'Login'}>
         <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -125,9 +123,20 @@ function App() {
           component={RecipeCreateScreen}
           options={{ title: 'レシピを投稿' }}
         />
-        <Stack.Screen name="Help" component={HelpScreen} options={{ title: '記録項目の説明' }} />
-        <Stack.Screen name="LabelManagement" component={LabelManagementScreen} />
-        <Stack.Screen name="RecipeList" component={RecipeListScreen} options={{ title: '保存されたレシピ' }} />
+        <Stack.Screen
+          name="Help"
+          component={HelpScreen}
+          options={{ title: '記録項目の説明' }}
+        />
+        <Stack.Screen
+          name="LabelManagement"
+          component={LabelManagementScreen}
+        />
+        <Stack.Screen
+          name="RecipeList"
+          component={RecipeListScreen}
+          options={{ title: '保存されたレシピ' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -64,9 +64,7 @@ const CommercialTransactionScreen: React.FC = () => {
 
       <View style={styles.section}>
         <Text style={styles.heading}>第4条（連絡先）</Text>
-        <Text style={styles.text}>
-          電話番号: 080-6759-6376
-        </Text>
+        <Text style={styles.text}>電話番号: 080-6759-6376</Text>
         <Text style={styles.text}>メールアドレス: info@sinamonoinfo.com</Text>
         <Text style={styles.note}>
           ※お問い合わせはメールでお願いいたします。

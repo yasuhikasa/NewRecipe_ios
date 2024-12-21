@@ -1,16 +1,56 @@
-// src/components/CustomCheckbox.tsx
 import React from 'react';
-import { TouchableOpacity, View, StyleSheet, Text } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
-type CustomCheckboxProps = {
+interface CustomCheckboxProps {
   value: boolean;
-  onValueChange: (newValue: boolean) => void;
+  onValueChange: (value: boolean) => void;
   label?: string;
-};
+}
 
-const CustomCheckbox: React.FC<CustomCheckboxProps> = ({ value, onValueChange, label }) => {
+const CustomCheckbox: React.FC<CustomCheckboxProps> = ({
+  value,
+  onValueChange,
+  label,
+}) => {
+  const { isLargeScreen } = useDeviceOrientation(); // iPad対応用
+
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: isLargeScreen ? 10 : 5,
+    },
+    checkbox: {
+      width: isLargeScreen ? 32 : 24,
+      height: isLargeScreen ? 32 : 24,
+      borderWidth: 2,
+      borderColor: '#6200ee',
+      borderRadius: 4,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: isLargeScreen ? 12 : 8,
+    },
+    checkedCheckbox: {
+      backgroundColor: '#6200ee',
+    },
+    checkmark: {
+      width: isLargeScreen ? 16 : 12,
+      height: isLargeScreen ? 16 : 12,
+      backgroundColor: '#fff',
+      borderRadius: 2,
+    },
+    label: {
+      fontSize: isLargeScreen ? 20 : 16,
+      color: '#555',
+    },
+  });
+
   return (
-    <TouchableOpacity style={styles.container} onPress={() => onValueChange(!value)}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={() => onValueChange(!value)}
+    >
       <View style={[styles.checkbox, value && styles.checkedCheckbox]}>
         {value && <View style={styles.checkmark} />}
       </View>
@@ -18,36 +58,5 @@ const CustomCheckbox: React.FC<CustomCheckboxProps> = ({ value, onValueChange, l
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: '#6200ee',
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  checkedCheckbox: {
-    backgroundColor: '#6200ee',
-  },
-  checkmark: {
-    width: 12,
-    height: 12,
-    backgroundColor: '#fff',
-    borderRadius: 2,
-  },
-  label: {
-    fontSize: 16,
-    color: '#555',
-  },
-});
 
 export default CustomCheckbox;

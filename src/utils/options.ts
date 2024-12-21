@@ -29,19 +29,19 @@ export const effortOptions: Option[] = [
 
 // 予算
 export const budgetOptions: Option[] = [
-  { label: "決めていない", value: "決めていない" },
-  { label: "300円以下", value: "300円以下" },
-  { label: "500円以下", value: "500円以下" },
-  { label: "1000円以下", value: "1000円以下" },
-  { label: "2000円以下", value: "2000円以下" },
-  { label: "3000円以下", value: "3000円以下" },
-  { label: "4000円以下", value: "4000円以下" },
-  { label: "5000円以下", value: "5000円以下" },
-  { label: "6000円以下", value: "6000円以下" },
-  { label: "7000円以下", value: "7000円以下" },
-  { label: "8000円以下", value: "8000円以下" },
-  { label: "9000円以下", value: "9000円以下" },
-  { label: "10000円以下", value: "10000円以下" },
+  { label: '決めていない', value: '決めていない' },
+  { label: '300円以下', value: '300円以下' },
+  { label: '500円以下', value: '500円以下' },
+  { label: '1000円以下', value: '1000円以下' },
+  { label: '2000円以下', value: '2000円以下' },
+  { label: '3000円以下', value: '3000円以下' },
+  { label: '4000円以下', value: '4000円以下' },
+  { label: '5000円以下', value: '5000円以下' },
+  { label: '6000円以下', value: '6000円以下' },
+  { label: '7000円以下', value: '7000円以下' },
+  { label: '8000円以下', value: '8000円以下' },
+  { label: '9000円以下', value: '9000円以下' },
+  { label: '10000円以下', value: '10000円以下' },
 ];
 
 // 気分
@@ -57,25 +57,25 @@ export const moodOptions: Option[] = [
 
 // 食べる時間帯
 export const mealTimeOptions: Option[] = [
-  { label: "朝食", value: "朝食" },
-  { label: "昼食", value: "昼食" },
-  { label: "夕食", value: "夕食" },
-  { label: "おやつ", value: "おやつ" },
-  { label: "夜食", value: "夜食" },
+  { label: '朝食', value: '朝食' },
+  { label: '昼食', value: '昼食' },
+  { label: '夕食', value: '夕食' },
+  { label: 'おやつ', value: 'おやつ' },
+  { label: '夜食', value: '夜食' },
 ];
 
 // 人数
 export const peopleOptions: Option[] = [
-  { label: "1人分", value: "1人分" },
-  { label: "2人分", value: "2人分" },
-  { label: "3〜4人分", value: "3〜4人分" },
-  { label: "5人以上", value: "5人以上" },
+  { label: '1人分', value: '1人分' },
+  { label: '2人分', value: '2人分' },
+  { label: '3〜4人分', value: '3〜4人分' },
+  { label: '5人以上', value: '5人以上' },
 ];
 
 // 趣向
 export const preferenceOptions: Option[] = [
-  { label: "野菜多め", value: "野菜多め" },
-  { label: "お肉多め", value: "お肉多め" },
-  { label: "魚料理中心", value: "魚料理中心" },
-  { label: "炭水化物メイン", value: "炭水化物メイン" },
+  { label: '野菜多め', value: '野菜多め' },
+  { label: 'お肉多め', value: 'お肉多め' },
+  { label: '魚料理中心', value: '魚料理中心' },
+  { label: '炭水化物メイン', value: '炭水化物メイン' },
 ];
