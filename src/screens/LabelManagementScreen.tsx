@@ -26,7 +26,7 @@ const LabelManagementScreen: React.FC<{ navigation: any }> = ({
     container: {
       flex: 1,
       padding: isLargeScreen ? (isLandscape ? 50 : 40) : 16, // iPadなら余白を広げる
-      backgroundColor: '#f5f5f5',
+      backgroundColor: '#FFF8E1',
     },
     header: {
       fontSize: isLargeScreen ? 28 : 24, // iPad用にフォントサイズを調整

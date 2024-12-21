@@ -7,6 +7,7 @@ import {
   Alert,
   Modal,
   TouchableWithoutFeedback,
+  ScrollView,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/types';
@@ -80,20 +81,23 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         return;
       }
 
+      console.log('送信するユーザーID:', userId);
+
       const response = await fetch(
         'https://recipeapp-096ac71f3c9b.herokuapp.com/api/AccountDelete',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${sessionData.session.access_token}`, // 認証トークンを送信
+            Authorization: `Bearer ${sessionData.session.access_token}`,
           },
           body: JSON.stringify({ userId }),
         },
       );
 
+      console.log('レスポンスステータス:', response.status);
       const result = await response.json();
-      console.log('アカウント削除結果:', result);
+      console.log('レスポンスデータ:', result);
 
       if (response.ok) {
         Alert.alert('アカウント削除完了', 'アカウントが削除されました。');
@@ -101,7 +105,6 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           index: 0,
           routes: [{ name: 'Login' }],
         });
-        setIsAccountDeleteConfirmVisible(false);
       } else {
         Alert.alert('エラー', result.error || 'アカウント削除に失敗しました。');
       }
@@ -118,7 +121,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           flex: 1,
           justifyContent: 'flex-start', // 上から始まる
           alignItems: 'center',
-          backgroundColor: '#f5f5f5',
+          backgroundColor: '#FFF8E1',
           paddingHorizontal: isLargeScreen ? 40 : 20,
           paddingTop: 20, // 余白を追加
         },
@@ -177,6 +180,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           borderRadius: 15,
           marginTop: 10,
           alignItems: 'center',
+          width: '80%',
         },
         smallButtonText: {
           color: '#000000',
@@ -190,6 +194,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           borderRadius: 15,
           marginTop: 10,
           alignItems: 'center',
+          width: '80%',
         },
         addButton: {
           backgroundColor: '#AED581',
@@ -229,7 +234,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.welcomeText}>Welcome to the Dashboard!</Text>
       {/* ラベル管理画面への遷移ボタン */}
       <TouchableOpacity
@@ -266,26 +271,26 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
       {/* メニュー項目の条件付きレンダリング */}
       {isOpenMenu && (
         <View style={styles.actionButtonsContainer}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.smallChangeButton}
             onPress={() => navigation.navigate('Help')}
           >
             <Text style={styles.smallButtonText}>各記録項目の説明</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.smallChangeButton}
             onPress={() => navigation.navigate('Contact')}
           >
             <Text style={styles.smallButtonText}>お問い合わせ</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.smallChangeButton}
             onPress={() => navigation.navigate('Subscription')}
           >
             <Text style={styles.smallButtonText}>
               サブスクリプションの購入・更新・解約について
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.smallChangeButton}
             onPress={() => navigation.navigate('AboutApp')}
@@ -373,7 +378,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           </Modal>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 

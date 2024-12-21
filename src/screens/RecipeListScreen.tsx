@@ -31,7 +31,7 @@ const RecipeListScreen: React.FC = () => {
     container: {
       flexGrow: 1,
       padding: isLargeScreen ? (isLandscape ? 50 : 40) : 16,
-      backgroundColor: '#f8f8f8',
+      backgroundColor: '#FFF8E1',
     },
     labelContainer: {
       marginBottom: isLargeScreen ? 24 : 16,
