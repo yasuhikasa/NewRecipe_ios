@@ -70,7 +70,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
       padding: isLargeScreen ? 40 : 20,
     },
     modalContainer: {
-      backgroundColor: '#fffaf0',
+      backgroundColor: '#fff',
       borderRadius: 8,
       width: isLargeScreen ? '80%' : '90%',
       maxHeight: '80%',

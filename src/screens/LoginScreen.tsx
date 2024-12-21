@@ -25,6 +25,16 @@ const LoginScreen: React.FC = () => {
   // iPadや大きな画面用にボタンのサイズを調整
   const appleButtonWidth = width > 600 ? 320 : 200;
 
+  // // ログイン処理を省略し、直接Dashboardに遷移
+  // const navigateToDashboard = useCallback(() => {
+  //   navigation.navigate('Dashboard');
+  // }, [navigation]);
+
+  // useEffect(() => {
+  //   // コンポーネントがマウントされたときにDashboardへ遷移
+  //   navigateToDashboard();
+  // }, [navigateToDashboard]);
+
   const handleAppleSignIn = async () => {
     try {
       // 1. `nonce` を生成
