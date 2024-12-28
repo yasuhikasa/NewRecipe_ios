@@ -45,20 +45,22 @@ type Option = {
   value: string;
 };
 
+const initialFormData: FormData = {
+  mood: '',
+  time: '',
+  mealTime: '',
+  budget: '',
+  effort: [],
+  preferredIngredients: '',
+  avoidedIngredients: '',
+  people: '',
+  preference: '',
+};
+
 const RecipeFormExtended = () => {
-  const [formData, setFormData] = useState<FormData>({
-    mood: '',
-    time: '',
-    mealTime: '',
-    budget: '',
-    effort: [],
-    preferredIngredients: '',
-    avoidedIngredients: '',
-    people: '',
-    preference: '',
-  });
 
   const [generatedRecipe, setGeneratedRecipe] = useState<string>('');
+  const [formData, setFormData] = useState<FormData>(initialFormData);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -159,7 +161,7 @@ const RecipeFormExtended = () => {
   // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
     const pointsToConsume = 2; // レシピ1回あたり消費するポイント
-    let pointsConsumed = false; // ポイント消費フラグ
+    // let pointsConsumed = false; // ポイント消費フラグ
 
     try {
       setIsGenerating(true);
@@ -212,41 +214,27 @@ const RecipeFormExtended = () => {
         // レシピ生成が成功した場合
         setGeneratedRecipe(response.data.recipe);
 
-        // ポイントを消費する
-        const { error: consumeError } = await supabase.rpc('update_points', {
-          p_user_id: userId,
-          p_added_points: -pointsToConsume, // 負の値でポイント消費
-        });
+        // 消費後のポイントを計算
+        const newTotalPoints = currentPoints - pointsToConsume;
 
-        if (consumeError) {
+        // ポイントを更新
+        const { error: updateError } = await supabase
+        .from('points')
+        .update({ total_points: newTotalPoints })
+        .eq('user_id', userId);
+
+        if (updateError) {
+          console.error('ポイント更新エラー:', updateError);
           throw new Error('ポイント消費に失敗しました。');
         }
 
-        pointsConsumed = true; // ポイント消費成功フラグを設定
+        // pointsConsumed = true; // ポイント消費成功フラグを設定
       } else {
         throw new Error('Invalid API response');
       }
     } catch (err) {
       console.error('Error generating recipe:', err);
       setError('レシピ生成中にエラーが発生しました。');
-
-      // ポイントを消費していた場合にのみロールバック
-      if (pointsConsumed) {
-        try {
-          const { data: userData } = await supabase.auth.getUser();
-          if (userData?.user?.id) {
-            await supabase.rpc('update_points', {
-              p_user_id: userData.user.id,
-              p_added_points: pointsToConsume, // ポイントを戻す
-            });
-          }
-        } catch (rollbackError) {
-          console.error(
-            'ポイントロールバック中にエラーが発生しました:',
-            rollbackError,
-          );
-        }
-      }
     } finally {
       setIsGenerating(false);
     }
@@ -255,10 +243,9 @@ const RecipeFormExtended = () => {
   // フォーム送信
   const handleSubmit = async () => {
     if (!formData.mood || !formData.time) {
-      setError('気分と調理時間は必須項目です！');
+      Alert.alert('気分と調理時間は必須項目です！');
       return;
     }
-    setError(null);
     await generateRecipe();
   };
 
@@ -311,6 +298,7 @@ const RecipeFormExtended = () => {
   // モーダルを閉じる
   const handleClose = () => {
     setModalOpen(false);
+    setFormData(initialFormData);
   };
 
   return (

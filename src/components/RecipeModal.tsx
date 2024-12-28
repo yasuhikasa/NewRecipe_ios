@@ -73,8 +73,8 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
       backgroundColor: '#fff',
       borderRadius: 8,
       width: isLargeScreen ? '80%' : '90%',
-      maxHeight: '80%',
-      padding: isLargeScreen ? 24 : 16,
+      maxHeight: '90%',
+      padding: isLargeScreen ? 20 : 12,
     },
     contentContainer: {
       flexGrow: 1,

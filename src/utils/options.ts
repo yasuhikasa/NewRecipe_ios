@@ -60,7 +60,6 @@ export const mealTimeOptions: Option[] = [
   { label: '朝食', value: '朝食' },
   { label: '昼食', value: '昼食' },
   { label: '夕食', value: '夕食' },
-  { label: 'おやつ', value: 'おやつ' },
   { label: '夜食', value: '夜食' },
 ];
 
