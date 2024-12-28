@@ -359,6 +359,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
       >
         <Text style={styles.guideButtonText}>このアプリの使い方</Text>
       </TouchableOpacity>
+      <Text style={styles.recipientLabel2}>⭐️レシピ管理</Text>
       {/* ラベル管理画面への遷移ボタン */}
       <TouchableOpacity
         style={styles.button}
@@ -375,12 +376,13 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         <Text style={styles.buttonText}>レシピ一覧へ</Text>
       </TouchableOpacity>
 
+      <Text style={styles.recipientLabel2}>⭐️レシピ作成へ</Text>
       {/* レシピ作成画面への遷移ボタン */}
       <TouchableOpacity
         style={styles.createButton}
         onPress={() => navigation.navigate('RecipeCreate')}
       >
-        <Text style={styles.buttonText}>レシピ作成へ</Text>
+        <Text style={styles.buttonText}>気分でレシピ作成</Text>
       </TouchableOpacity>
 
       <Text style={styles.recipientLabel2}>⭐️その他メニュー</Text>

@@ -73,7 +73,7 @@ const CommercialTransactionScreen: React.FC = () => {
 
       <View style={styles.section}>
         <Text style={styles.heading}>第5条（販売価格）</Text>
-        <Text style={styles.text}>月額500円（税込）</Text>
+        <Text style={styles.text}>アプリ内課金100円、200円（税込）</Text>
       </View>
 
       <View style={styles.section}>
@@ -124,39 +124,5 @@ const CommercialTransactionScreen: React.FC = () => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: '#FFF8E1',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#FF7043',
-  },
-  section: {
-    marginBottom: 20,
-  },
-  heading: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#37474F',
-  },
-  text: {
-    fontSize: 16,
-    color: '#37474F',
-    lineHeight: 24,
-    marginBottom: 10,
-  },
-  note: {
-    fontSize: 14,
-    color: '#757575',
-    marginTop: 5,
-  },
-});
 
 export default CommercialTransactionScreen;

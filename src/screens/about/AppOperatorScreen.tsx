@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { Text, StyleSheet, ScrollView } from 'react-native';
 import useDeviceOrientation from '../../hooks/useDeviceOrientation';
 
 const AppOperatorScreen: React.FC = () => {
-  const { isLargeScreen, isLandscape } = useDeviceOrientation();
+  const { isLargeScreen } = useDeviceOrientation();
 
   const styles = StyleSheet.create({
     container: {
