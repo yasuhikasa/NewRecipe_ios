@@ -87,6 +87,13 @@ const RecipeListScreen: React.FC = () => {
       fontSize: isLargeScreen ? 18 : 16,
       color: '#777',
     },
+    operationGuide: {
+      fontSize: isLargeScreen ? 24 : 18,
+      color: '#777',
+      textAlign: 'center',
+      marginTop: 10,
+      marginBottom: 10,
+    },
   });
 
   const loadData = useCallback(async (labelId?: string | null) => {
@@ -166,7 +173,11 @@ const RecipeListScreen: React.FC = () => {
           ))}
         </View>
       </View>
-
+      <View>
+        <Text style={styles.operationGuide}>
+          レシピを長押しするとレシピ名の編集とラベル分けができます。
+        </Text>
+      </View>
       {/* レシピセクション */}
       <View style={styles.recipeContainer}>
         {recipes.length === 0 ? (

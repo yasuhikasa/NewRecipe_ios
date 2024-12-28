@@ -4,10 +4,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './src/screens/LoginScreen';
 import ContactScreen from './src/screens/ContactScreen';
-import HelpScreen from './src/screens/HelpScreen';
 import { RootStackParamList } from './src/types/types';
 import supabase from './src/config/supabaseClient';
-import SubscriptionScreen from './src/screens/SubscriptionScreen';
+import PurchaseScreen from './src/screens/PurchaseScreen';
 import AboutAppScreen from './src/screens/about/AboutAppScreen';
 import TermsOfServiceScreen from './src/screens/about/TermsOfServiceScreen';
 import PrivacyPolicyScreen from './src/screens/about/PrivacyPolicyScreen';
@@ -19,6 +18,7 @@ import DashboardScreen from './src/screens/DashboardScreen';
 import RecipeCreateScreen from './src/screens/RecipeCreateScreen';
 import RecipeListScreen from './src/screens/RecipeListScreen';
 import LabelManagementScreen from './src/screens/LabelManagementScreen';
+import HowToUseScreen from './src/screens/HowToUseScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -74,7 +74,7 @@ function App() {
         <Stack.Screen
           name="Login"
           component={LoginScreen}
-          options={{ title: 'レシピアプリ' }}
+          options={{ title: 'こだわりの創作料理レシピ' }}
         />
 
         <Stack.Screen
@@ -83,11 +83,6 @@ function App() {
           options={{ title: 'ダッシュボード' }}
         />
         <Stack.Screen name="Contact" component={ContactScreen} />
-        <Stack.Screen
-          name="Subscription"
-          component={SubscriptionScreen}
-          options={{ title: 'サブスクリプションについて' }}
-        />
         <Stack.Screen
           name="AboutApp"
           component={AboutAppScreen}
@@ -121,21 +116,27 @@ function App() {
         <Stack.Screen
           name="RecipeCreate"
           component={RecipeCreateScreen}
-          options={{ title: 'レシピを投稿' }}
-        />
-        <Stack.Screen
-          name="Help"
-          component={HelpScreen}
-          options={{ title: '記録項目の説明' }}
+          options={{ title: 'レシピを作成' }}
         />
         <Stack.Screen
           name="LabelManagement"
           component={LabelManagementScreen}
+          options={{ title: 'ラベル（カテゴリ）作成' }}
         />
         <Stack.Screen
           name="RecipeList"
           component={RecipeListScreen}
           options={{ title: '保存されたレシピ' }}
+        />
+        <Stack.Screen
+          name="Purchase"
+          component={PurchaseScreen}
+          options={{ title: 'ポイント購入' }}
+        />
+        <Stack.Screen
+          name="HowToUse"
+          component={HowToUseScreen}
+          options={{ title: 'このアプリの使い方' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

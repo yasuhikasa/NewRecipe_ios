@@ -1,6 +1,5 @@
 export type RootStackParamList = {
   Login: undefined;
-  Help: undefined;
   Subscription: undefined;
   AboutApp: undefined;
   TermsOfService: undefined;
@@ -13,6 +12,8 @@ export type RootStackParamList = {
   RecipeCreate: undefined;
   RecipeList: undefined;
   LabelManagement: undefined;
+  Purchase: undefined;
+  HowToUse: undefined;
 };
 
 export type Recipe = {

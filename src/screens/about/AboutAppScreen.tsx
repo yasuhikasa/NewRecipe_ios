@@ -78,12 +78,12 @@ const AboutAppScreen: React.FC<Props> = ({ navigation }: any) => {
         <Text style={styles.buttonText}>プライバシーポリシー</Text>
       </TouchableOpacity>
 
-      {/* <TouchableOpacity
+      <TouchableOpacity
         style={styles.button}
         onPress={() => navigateToPage('CommercialTransaction')}
       >
         <Text style={styles.buttonText}>特定商取引法に基づく表記</Text>
-      </TouchableOpacity> */}
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.button}

@@ -24,6 +24,8 @@ target 'NewRecipeIos' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  pod 'RNIap', :path => '../node_modules/react-native-iap'
+
   target 'NewRecipeIosTests' do
     inherit! :complete
     # Pods for testing

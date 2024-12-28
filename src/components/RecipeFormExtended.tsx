@@ -158,11 +158,46 @@ const RecipeFormExtended = () => {
 
   // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
+    const pointsToConsume = 2; // レシピ1回あたり消費するポイント
+    let pointsConsumed = false; // ポイント消費フラグ
+
     try {
       setIsGenerating(true);
       setGeneratedRecipe(''); // 初期化
       setModalOpen(true); // モーダルを先に開く
 
+      const { data: userData, error: userError } =
+        await supabase.auth.getUser();
+      if (userError || !userData?.user?.id) {
+        Alert.alert('エラー', 'ユーザー情報の取得に失敗しました。');
+        return;
+      }
+      const userId = userData.user.id;
+
+      // 現在のポイントを取得
+      const { data: pointsData, error: pointsError } = await supabase
+        .from('points')
+        .select('total_points')
+        .eq('user_id', userId)
+        .single();
+
+      if (pointsError || !pointsData) {
+        Alert.alert('エラー', '現在のポイントを取得できませんでした。');
+        return;
+      }
+
+      const currentPoints = pointsData.total_points;
+
+      // ポイント不足を確認
+      if (currentPoints < pointsToConsume) {
+        Alert.alert(
+          'エラー',
+          'ポイントが不足しています。ポイントを購入してください。',
+        );
+        return;
+      }
+
+      // レシピ生成 API を呼び出す
       const response = await axios.post(
         'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-recipe',
         formData,
@@ -173,16 +208,45 @@ const RecipeFormExtended = () => {
         },
       );
 
-      console.log('API Response:', response.data);
-
       if (response.data && response.data.recipe) {
+        // レシピ生成が成功した場合
         setGeneratedRecipe(response.data.recipe);
+
+        // ポイントを消費する
+        const { error: consumeError } = await supabase.rpc('update_points', {
+          p_user_id: userId,
+          p_added_points: -pointsToConsume, // 負の値でポイント消費
+        });
+
+        if (consumeError) {
+          throw new Error('ポイント消費に失敗しました。');
+        }
+
+        pointsConsumed = true; // ポイント消費成功フラグを設定
       } else {
         throw new Error('Invalid API response');
       }
     } catch (err) {
       console.error('Error generating recipe:', err);
       setError('レシピ生成中にエラーが発生しました。');
+
+      // ポイントを消費していた場合にのみロールバック
+      if (pointsConsumed) {
+        try {
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData?.user?.id) {
+            await supabase.rpc('update_points', {
+              p_user_id: userData.user.id,
+              p_added_points: pointsToConsume, // ポイントを戻す
+            });
+          }
+        } catch (rollbackError) {
+          console.error(
+            'ポイントロールバック中にエラーが発生しました:',
+            rollbackError,
+          );
+        }
+      }
     } finally {
       setIsGenerating(false);
     }

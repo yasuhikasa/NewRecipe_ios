@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect } from 'react';
-import { View, Alert, StyleSheet, useWindowDimensions } from 'react-native';
+import {
+  View,
+  Alert,
+  StyleSheet,
+  useWindowDimensions,
+  Text,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppleAuthentication from '@invertase/react-native-apple-authentication';
 import supabase from '../config/supabaseClient';
@@ -20,20 +26,10 @@ type LoginScreenNavigationProp = StackNavigationProp<
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
-  const { width } = useWindowDimensions();  // 画面の幅を取得
+  const { width } = useWindowDimensions(); // 画面の幅を取得
 
   // iPadや大きな画面用にボタンのサイズを調整
   const appleButtonWidth = width > 600 ? 320 : 200;
-
-  // // ログイン処理を省略し、直接Dashboardに遷移
-  // const navigateToDashboard = useCallback(() => {
-  //   navigation.navigate('Dashboard');
-  // }, [navigation]);
-
-  // useEffect(() => {
-  //   // コンポーネントがマウントされたときにDashboardへ遷移
-  //   navigateToDashboard();
-  // }, [navigateToDashboard]);
 
   const handleAppleSignIn = async () => {
     try {
@@ -64,36 +60,37 @@ const LoginScreen: React.FC = () => {
         nonce, // Supabaseでも同じ `nonce` を渡す
       });
 
+      console.log('サインイン成功:', data);
+      const userId = data?.user?.id;
+      console.log('ユーザーID:', userId);
       if (error) {
+        console.error('サインインエラー:', error);
         throw error;
       }
-
-      // 5. 初回サインアップ時にユーザー情報を作成
-      if (appleAuthResponse) {
-        const userId = data.user.id;
-        console.log('ユーザーID:', userId);
-
-        const profileResponse = await fetch(
-          'https://recipeapp-096ac71f3c9b.herokuapp.com/api/NewCareCreateUserProfiles',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId }),
-          },
-        );
-
-        if (!profileResponse.ok) {
-          console.error(
-            'プロフィール作成エラー:',
-            await profileResponse.text(),
-          );
-        }
+      if (!userId) {
+        throw new Error('ユーザーIDが取得できませんでした');
       }
 
-      // 6. セッション情報を保存
+      const { data: userProfile, error: fetchError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (fetchError && !userProfile) {
+        console.log(
+          '新規サインアップ: プロファイル作成とポイント付与を開始します',
+        );
+        await createUserProfile(userId);
+        await addSignupPoints(userId);
+      } else if (fetchError) {
+        throw fetchError;
+      }
+
+      // 7. セッション情報を保存
       await saveSession(data.session);
 
-      // 7. ログイン後の画面遷移
+      // 8. ログイン後の画面遷移
       navigation.navigate('Dashboard');
     } catch (err) {
       console.error('サインインエラー:', err);
@@ -101,6 +98,50 @@ const LoginScreen: React.FC = () => {
     }
   };
 
+  // プロファイル作成処理
+  const createUserProfile = async (userId: string) => {
+    try {
+      const response = await fetch(
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/NewCareCreateUserProfiles',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+      console.log('プロファイル作成成功:', userId);
+    } catch (error) {
+      console.error('プロファイル作成エラー:', error);
+    }
+  };
+
+  // 初回ボーナスポイント付与処理
+  const addSignupPoints = async (userId: String) => {
+    try {
+      // 新規作成
+      console.log('ポイントを新規作成します:', userId);
+      const { error: insertError } = await supabase.from('points').insert({
+        user_id: userId,
+        total_points: 10,
+      });
+
+      if (insertError) {
+        console.error('ポイント追加エラー:', insertError);
+        throw insertError;
+      }
+
+      console.log('ポイントを新規作成しました:', userId);
+    } catch (error) {
+      console.error('ポイント追加エラー:', error);
+      throw error;
+    }
+  };
+
+  // セッション情報保存
   const saveSession = async (session: any) => {
     try {
       await AsyncStorage.setItem('loginSession', JSON.stringify(session));
@@ -133,34 +174,54 @@ const LoginScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.announcementText}>⭐️サインインはこちらから</Text>
       <View style={styles.appleButtonContainer}>
-        {/* Appleサインインボタン */}
         <AppleButton
-          style={[styles.appleButton, { width: appleButtonWidth }]}  // 幅を動的に設定
+          style={[styles.appleButton, { width: appleButtonWidth }]}
           buttonType={AppleButton.Type.SIGN_IN}
           buttonStyle={AppleButton.Style.WHITE}
           onPress={handleAppleSignIn}
         />
       </View>
+      <Text
+        style={styles.switchText}
+        onPress={() => navigation.navigate('HowToUse')}
+      >
+        このアプリの使い方について
+      </Text>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: '#FFF8E1',
+    paddingTop: 60,
+  },
+  announcementText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
   },
   appleButtonContainer: {
-    borderWidth: 1, // 枠線の太さ
-    borderColor: 'black', // 枠線の色
-    borderRadius: 5, // 角丸
+    borderWidth: 1,
+    borderColor: 'black',
+    borderRadius: 5,
   },
   appleButton: {
     width: 200,
     height: 44,
-    borderRadius: 5, // ボタンの角も丸める
+    borderRadius: 5,
+  },
+  switchText: {
+    textAlign: 'center',
+    color: 'blue',
+    marginTop: 50,
+    fontSize: 20,
   },
 });
 
