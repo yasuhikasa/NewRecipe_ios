@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import { fetchRecipesWithLabels, getUser } from '../utils/api';
 import RecipeDetailModal from '../components/RecipeDetailModal';
@@ -19,6 +20,7 @@ const RecipeListScreen: React.FC = () => {
   const [labels, setLabels] = useState<Label[]>([]);
   const [selectedLabelId, setSelectedLabelId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
   const [editRecipeName, setEditRecipeName] = useState<string>('');
@@ -96,23 +98,27 @@ const RecipeListScreen: React.FC = () => {
     },
   });
 
-  const loadData = useCallback(async (labelId?: string | null) => {
-    setLoading(true);
-    try {
-      const user = await getUser();
-      const { labels = [], recipes = [] } = await fetchRecipesWithLabels(
-        user.id,
-        labelId || undefined,
-      );
-      setLabels(labels);
-      setRecipes(recipes);
-    } catch (error: any) {
-      console.error('Error fetching data:', error.message);
-      Alert.alert('エラー', 'データの取得に失敗しました');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loadData = useCallback(
+    async (labelId?: string | null, isRefreshing = false) => {
+      if (!isRefreshing) setLoading(true);
+      try {
+        const user = await getUser();
+        const { labels = [], recipes = [] } = await fetchRecipesWithLabels(
+          user.id,
+          labelId || undefined,
+        );
+        setLabels(labels);
+        setRecipes(recipes);
+      } catch (error: any) {
+        console.error('Error fetching data:', error.message);
+        Alert.alert('エラー', 'データの取得に失敗しました');
+      } finally {
+        if (isRefreshing) setRefreshing(false);
+        else setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     loadData(null);
@@ -135,6 +141,11 @@ const RecipeListScreen: React.FC = () => {
     setDetailModalVisible(true);
   };
 
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadData(selectedLabelId, true); // 現在のラベルに基づいてリロード
+  };
+
   if (loading) {
     return (
       <View style={styles.loaderContainer}>
@@ -144,7 +155,12 @@ const RecipeListScreen: React.FC = () => {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    >
       {/* ラベルセクション */}
       <View style={styles.labelContainer}>
         <View style={styles.labelContentContainer}>
