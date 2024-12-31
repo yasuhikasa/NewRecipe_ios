@@ -52,7 +52,20 @@ export const moodOptions: Option[] = [
   { label: '寝起き', value: '寝起き' },
   { label: 'ヘルシー志向', value: 'ヘルシー志向' },
   { label: 'スタミナ重視', value: 'スタミナ重視' },
-  { label: 'おまかせ', value: 'おまかせ' },
+  { label: '甘いものが欲しい', value: '甘いものが欲しい' },
+  { label: 'ピリ辛が食べたい', value: 'ピリ辛が食べたい' },
+  { label: '心を落ち着けたい', value: '心を落ち着けたい' },
+  { label: 'スープが飲みたい', value: 'スープが飲みたい' },
+  { label: '野菜をたっぷり取りたい', value: '野菜をたっぷり取りたい' },
+  { label: 'エネルギー補給したい', value: 'エネルギー補給したい' },
+  { label: '手軽に食べたい', value: '手軽に食べたい' },
+  { label: 'リラックスしたい', value: 'リラックスしたい' },
+  { label: '罪悪感なく食べたい', value: '罪悪感なく食べたい' },
+  { label: 'ホットな料理が欲しい', value: 'ホットな料理が欲しい' },
+  { label: '冷たいものが欲しい', value: '冷たいものが欲しい' },
+  { label: '塩味が食べたい', value: '塩味が食べたい' },
+  { label: '炭水化物を取りたい', value: '炭水化物を取りたい' },
+  { label: 'プロテイン補給したい', value: 'プロテイン補給したい' },
 ];
 
 // 食べる時間帯
@@ -77,4 +90,5 @@ export const preferenceOptions: Option[] = [
   { label: 'お肉多め', value: 'お肉多め' },
   { label: '魚料理中心', value: '魚料理中心' },
   { label: '炭水化物メイン', value: '炭水化物メイン' },
+  { label: 'おまかせ', value: 'おまかせ' },
 ];

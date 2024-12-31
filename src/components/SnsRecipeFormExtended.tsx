@@ -1,9 +1,7 @@
-// src/components/RecipeFormExtended.tsx
 import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -13,49 +11,92 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
-import {
-  moodOptions,
-  cookingTimeOptions,
-  effortOptions,
-  mealTimeOptions,
-  budgetOptions,
-  peopleOptions,
-} from '../utils/options';
 import RecipeModal from './RecipeModal'; // 別ファイルからインポート
-import CustomCheckbox from './CustomCheckbox'; // カスタムチェックボックス
 import CustomSelect from './CustomSelect'; // カスタムセレクトボックス
 import supabase from '../config/supabaseClient';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
-// フォームデータの型定義
 type FormData = {
-  mood: string;
-  time: string;
-  mealTime: string;
-  budget: string;
-  effort: string[];
-  preferredIngredients: string;
-  people: string;
-  preference: string;
-};
-
-type Option = {
-  label: string;
-  value: string;
+  snsAppearance: string;
+  snsColorTheme: string;
+  snsPlatingIdea: string;
+  snsDishType: string;
+  snsIngredient: string;
 };
 
 const initialFormData: FormData = {
-  mood: '',
-  time: '',
-  mealTime: '',
-  budget: '',
-  effort: [],
-  preferredIngredients: '',
-  people: '',
-  preference: '',
+  snsAppearance: '',
+  snsColorTheme: '',
+  snsPlatingIdea: '',
+  snsDishType: '',
+  snsIngredient: '',
 };
 
-const RecipeFormExtended = () => {
+const snsAppearanceOptions = [
+  { label: 'カラフルで鮮やか', value: 'カラフルで鮮やか' },
+  { label: '盛り付けが美しい', value: '盛り付けが美しい' },
+  { label: 'ユニークな形状', value: 'ユニークな形状' },
+  { label: '立体感のあるデザイン', value: '立体感のあるデザイン' },
+  { label: '写真映えするデザート', value: '写真映えするデザート' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const snsColorThemeOptions = [
+  { label: 'パステルカラー', value: 'パステルカラー' },
+  { label: 'レインボーカラー', value: 'レインボーカラー' },
+  { label: 'モノクローム', value: 'モノクローム' },
+  { label: 'グリーン＆ナチュラル', value: 'グリーン＆ナチュラル' },
+  { label: 'ビビッドトーン', value: 'ビビッドトーン' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const snsPlatingIdeas = [
+  { label: '高さを出す盛り付け', value: '高さを出す盛り付け' },
+  { label: 'パターンを描く盛り付け', value: 'パターンを描く盛り付け' },
+  { label: '複数の小皿を使用', value: '複数の小皿を使用' },
+  { label: 'テーブル全体を使った配置', value: 'テーブル全体を使った配置' },
+  { label: 'ユニークな器を使う', value: 'ユニークな器を使う' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const snsDishTypeOptions = [
+  {
+    label: 'スイーツ（例：ケーキ、マカロン）',
+    value: 'スイーツ（例：ケーキ、マカロン）',
+  },
+  {
+    label: 'ドリンク（例：ラテアート、スムージー）',
+    value: 'ドリンク（例：ラテアート、スムージー）',
+  },
+  { label: 'ブランチメニュー', value: 'ブランチメニュー' },
+  { label: '和風デザインの料理', value: '和風デザインの料理' },
+  { label: '個性的なバーガーやピザ', value: '個性的なバーガーやピザ' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const snsIngredientOptions = [
+  {
+    label: 'ベリー類（例：ブルーベリー、ストロベリー）',
+    value: 'ベリー類（例：ブルーベリー、ストロベリー）',
+  },
+  { label: 'エディブルフラワー', value: 'エディブルフラワー' },
+  { label: 'アボカド', value: 'アボカド' },
+  {
+    label: 'カラフルな野菜（例：パプリカ、ズッキーニ）',
+    value: 'カラフルな野菜（例：パプリカ、ズッキーニ）',
+  },
+  {
+    label: 'ハーブ（例：バジル、ミント）',
+    value: 'ハーブ（例：バジル、ミント）',
+  },
+  {
+    label: 'シーフード（例：エビ、サーモン）',
+    value: 'シーフード（例：エビ、サーモン）',
+  },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const SnsRecipeFormExtended = () => {
   const [generatedRecipe, setGeneratedRecipe] = useState<string>('');
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -128,38 +169,6 @@ const RecipeFormExtended = () => {
     }));
   };
 
-  const MAX_SELECTION = 3;
-  // チェックボックスの変更ハンドラー
-  const handleCheckboxChange = (value: string, checked: boolean) => {
-    setFormData((prev) => {
-      const currentArray = prev.effort;
-
-      // 選択追加時に最大数を確認
-      if (checked && currentArray.length >= MAX_SELECTION) {
-        Alert.alert(
-          '選択制限',
-          `最大${MAX_SELECTION}つまでしか選択できません。`,
-        );
-        return prev; // 制限時は変更しない
-      }
-
-      return {
-        ...prev,
-        effort: checked
-          ? [...currentArray, value] // 選択を追加
-          : currentArray.filter((item) => item !== value), // 選択を解除
-      };
-    });
-  };
-
-  // テキストフィールドの変更ハンドラー
-  const handleInputChange = (name: keyof FormData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
     const pointsToConsume = 2; // レシピ1回あたり消費するポイント
@@ -201,11 +210,9 @@ const RecipeFormExtended = () => {
         return;
       }
 
-      console.log('フォームデータ:', formData);
-
       // レシピ生成 API を呼び出す
       const response = await axios.post(
-        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-recipe',
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-sns-recipe',
         formData,
         {
           headers: {
@@ -246,8 +253,14 @@ const RecipeFormExtended = () => {
 
   // フォーム送信
   const handleSubmit = async () => {
-    if (!formData.mood) {
-      Alert.alert('気分の選択は必須です！');
+    if (
+      !formData.snsAppearance &&
+      !formData.snsColorTheme &&
+      !formData.snsPlatingIdea &&
+      !formData.snsDishType &&
+      !formData.snsIngredient
+    ) {
+      Alert.alert('いずれかの項目を入力してください！');
       return;
     }
     await generateRecipe();
@@ -312,66 +325,46 @@ const RecipeFormExtended = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.innerContainer}>
-          <Text style={styles.title}>🍳 あなたのこだわりレシピを作ろう</Text>
-
+          <Text style={styles.title}>
+            📸 SNS映え料理のこだわりを選択してください
+          </Text>
           <CustomSelect
-            label="今の気分😃"
-            selectedValue={formData.mood}
-            onValueChange={(value) => handleSelectChange('mood', value)}
-            options={moodOptions}
-          />
-          <CustomSelect
-            label="調理時間⏰"
-            selectedValue={formData.time}
-            onValueChange={(value) => handleSelectChange('time', value)}
-            options={cookingTimeOptions}
-          />
-          <CustomSelect
-            label="食べる時間帯🍽️"
-            selectedValue={formData.mealTime}
-            onValueChange={(value) => handleSelectChange('mealTime', value)}
-            options={mealTimeOptions}
-          />
-
-          {/* 予算のセレクトボックスを追加 */}
-          <CustomSelect
-            label="予算💰"
-            selectedValue={formData.budget}
-            onValueChange={(value) => handleSelectChange('budget', value)}
-            options={budgetOptions}
-          />
-
-          {/* 人数のセレクトボックスを追加 */}
-          <CustomSelect
-            label="人数👥"
-            selectedValue={formData.people}
-            onValueChange={(value) => handleSelectChange('people', value)}
-            options={peopleOptions}
-          />
-
-          <View style={styles.section}>
-            <Text style={styles.label}>手間🖐️</Text>
-            {effortOptions.map((option: Option) => (
-              <CustomCheckbox
-                key={option.value}
-                value={formData.effort.includes(option.value)}
-                onValueChange={(checked) =>
-                  handleCheckboxChange(option.value, checked)
-                }
-                label={option.label}
-              />
-            ))}
-          </View>
-
-          <Text style={styles.label}>使いたい食材🥕</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="使いたい食材 🥕 (例: 鶏肉, トマト)"
-            value={formData.preferredIngredients}
-            maxLength={20}
-            onChangeText={(value) =>
-              handleInputChange('preferredIngredients', value)
+            label="見た目のこだわり❤️"
+            selectedValue={formData.snsAppearance}
+            onValueChange={(value) =>
+              handleSelectChange('snsAppearance', value)
             }
+            options={snsAppearanceOptions}
+          />
+          <CustomSelect
+            label="色合いのテーマ🩵"
+            selectedValue={formData.snsColorTheme}
+            onValueChange={(value) =>
+              handleSelectChange('snsColorTheme', value)
+            }
+            options={snsColorThemeOptions}
+          />
+          <CustomSelect
+            label="盛り付けアイデア🍓"
+            selectedValue={formData.snsPlatingIdea}
+            onValueChange={(value) =>
+              handleSelectChange('snsPlatingIdea', value)
+            }
+            options={snsPlatingIdeas}
+          />
+          <CustomSelect
+            label="料理の種類🍳"
+            selectedValue={formData.snsDishType}
+            onValueChange={(value) => handleSelectChange('snsDishType', value)}
+            options={snsDishTypeOptions}
+          />
+          <CustomSelect
+            label="使用する食材🐟"
+            selectedValue={formData.snsIngredient}
+            onValueChange={(value) =>
+              handleSelectChange('snsIngredient', value)
+            }
+            options={snsIngredientOptions}
           />
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             {isGenerating ? (
@@ -382,11 +375,9 @@ const RecipeFormExtended = () => {
               </Text>
             )}
           </TouchableOpacity>
-
           {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
-
-        {/* ストリーミングされたレシピを表示するためのモーダル */}
+        {/* モーダル */}
         {modalOpen && (
           <RecipeModal
             open={modalOpen}
@@ -402,4 +393,4 @@ const RecipeFormExtended = () => {
   );
 };
 
-export default RecipeFormExtended;
+export default SnsRecipeFormExtended;

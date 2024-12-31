@@ -20,6 +20,18 @@ import RecipeListScreen from './src/screens/RecipeListScreen';
 import LabelManagementScreen from './src/screens/LabelManagementScreen';
 import HowToUseScreen from './src/screens/HowToUseScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DietCreateScreen from './src/screens/DietCreateScreen';
+import BeautyRecipeCreateScreen from './src/screens/BeautyRecipeScreen';
+import KidsCreateScreen from './src/screens/KidsCreateScreen';
+import SnsCreateScreen from './src/screens/SnsCreateScreen';
+import LunchboxCreateScreen from './src/screens/LunchboxCreateScreen';
+import SweetCreateScreen from './src/screens/SweetCreateScreen';
+import SpicyCreateScreen from './src/screens/SpicyCreateScreen';
+import TraditionalJapaneseCreateScreen from './src/screens/TraditionalJapaneseCreateScreen';
+import WesternDishCreateScreen from './src/screens/WesternDishCreateScreen';
+import BistroDishCreateScreen from './src/screens/BistroDishCreateScreen';
+import CocktailCreateScreen from './src/screens/CocktailCreateScreen';
+import SpecialDayCreateScreen from './src/screens/SpecialDayCreateScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -116,7 +128,67 @@ function App() {
         <Stack.Screen
           name="RecipeCreate"
           component={RecipeCreateScreen}
-          options={{ title: 'レシピを作成' }}
+          options={{ title: '今の気分でレシピを作成' }}
+        />
+        <Stack.Screen
+          name="DietCreate"
+          component={DietCreateScreen}
+          options={{ title: 'ダイエットレシピを作成' }}
+        />
+        <Stack.Screen
+          name="BeautyCreate"
+          component={BeautyRecipeCreateScreen}
+          options={{ title: '美容レシピを作成' }}
+        />
+        <Stack.Screen
+          name="KidsCreate"
+          component={KidsCreateScreen}
+          options={{ title: '子供向けレシピを作成' }}
+        />
+        <Stack.Screen
+          name="LunchboxCreate"
+          component={LunchboxCreateScreen}
+          options={{ title: 'お弁当レシピを作成' }}
+        />
+        <Stack.Screen
+          name="SnsCreate"
+          component={SnsCreateScreen}
+          options={{ title: 'SNS映えレシピを作成' }}
+        />
+        <Stack.Screen
+          name="SweetCreate"
+          component={SweetCreateScreen}
+          options={{ title: 'スイーツレシピを作成' }}
+        />
+        <Stack.Screen
+          name="SpicyCreate"
+          component={SpicyCreateScreen}
+          options={{ title: 'ピリ辛レシピを作成' }}
+        />
+        <Stack.Screen
+          name="TraditionalJapaneseCreate"
+          component={TraditionalJapaneseCreateScreen}
+          options={{ title: '和食レシピを作成' }}
+        />
+        <Stack.Screen
+          name="WesternDishCreate"
+          component={WesternDishCreateScreen}
+          options={{ title: '洋食レシピを作成' }}
+        />
+        <Stack.Screen
+          name="BistroCreate"
+          component={BistroDishCreateScreen}
+          options={{ title: 'ビストロ風レシピを作成' }}
+        />
+        <Stack.Screen
+          name="CocktailCreate"
+          component={CocktailCreateScreen}
+          options={{ title: 'カクテルレシピを作成' }}
+        />
+        <Stack.Screen
+          name="SpecialDayCreate"
+          component={SpecialDayCreateScreen}
+          options={{ title: '特別な日のレシピを作成' }}
         />
         <Stack.Screen
           name="LabelManagement"

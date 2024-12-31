@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -382,7 +382,93 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         style={styles.createButton}
         onPress={() => navigation.navigate('RecipeCreate')}
       >
-        <Text style={styles.buttonText}>気分でレシピ作成</Text>
+        <Text style={styles.buttonText}>今の気分でレシピ作成</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('LunchboxCreate')}
+      >
+        <Text style={styles.buttonText}>こだわりのお弁当レシピ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('DietCreate')}
+      >
+        <Text style={styles.buttonText}>こだわりのダイエットレシピ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('BeautyCreate')}
+      >
+        <Text style={styles.buttonText}>
+          こだわりの美容・アンチエイジングレシピ
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('SnsCreate')}
+      >
+        <Text style={styles.buttonText}>こだわりのSNS映えレシピ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('KidsCreate')}
+      >
+        <Text style={styles.buttonText}>こだわりの子供向けレシピ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('SweetCreate')}
+      >
+        <Text style={styles.buttonText}>こだわりのスイーツレシピ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('SpicyCreate')}
+      >
+        <Text style={styles.buttonText}>こだわりのピリ辛レシピ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('TraditionalJapaneseCreate')}
+      >
+        <Text style={styles.buttonText}>こだわりの和食レシピ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('WesternDishCreate')}
+      >
+        <Text style={styles.buttonText}>こだわりの洋食レシピ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('BistroCreate')}
+      >
+        <Text style={styles.buttonText}>こだわりのビストロレシピ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('SpecialDayCreate')}
+      >
+        <Text style={styles.buttonText}>こだわりの特別な日レシピ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('CocktailCreate')}
+      >
+        <Text style={styles.buttonText}>こだわりのカクテルレシピ</Text>
       </TouchableOpacity>
 
       <Text style={styles.recipientLabel2}>⭐️その他メニュー</Text>
@@ -436,6 +522,9 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                   </Text>
                   <Text style={styles.operationGuide}>
                     ※注意：削除したアカウントは復元できません。記録したデータも全て削除されます。
+                  </Text>
+                  <Text style={styles.operationGuide}>
+                    購入したポイントも全て失われます。
                   </Text>
                   <Text style={styles.operationGuide}>
                     データ復元はできませんので、ご注意ください。

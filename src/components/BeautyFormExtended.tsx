@@ -1,4 +1,4 @@
-// src/components/RecipeFormExtended.tsx
+// src/components/BeautyRecipeFormExtended.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -13,49 +13,108 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
-import {
-  moodOptions,
-  cookingTimeOptions,
-  effortOptions,
-  mealTimeOptions,
-  budgetOptions,
-  peopleOptions,
-} from '../utils/options';
-import RecipeModal from './RecipeModal'; // 別ファイルからインポート
-import CustomCheckbox from './CustomCheckbox'; // カスタムチェックボックス
-import CustomSelect from './CustomSelect'; // カスタムセレクトボックス
+import RecipeModal from './RecipeModal';
+import CustomCheckbox from './CustomCheckbox';
+import CustomSelect from './CustomSelect';
 import supabase from '../config/supabaseClient';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
-// フォームデータの型定義
 type FormData = {
-  mood: string;
-  time: string;
-  mealTime: string;
-  budget: string;
-  effort: string[];
+  preferences: string[];
+  skinCare: string;
+  detox: string;
+  flavor: string;
+  cookingMethod: string;
+  ingredients: string[];
   preferredIngredients: string;
-  people: string;
-  preference: string;
-};
-
-type Option = {
-  label: string;
-  value: string;
 };
 
 const initialFormData: FormData = {
-  mood: '',
-  time: '',
-  mealTime: '',
-  budget: '',
-  effort: [],
+  preferences: [],
+  skinCare: '',
+  detox: '',
+  flavor: '',
+  cookingMethod: '',
+  ingredients: [],
   preferredIngredients: '',
-  people: '',
-  preference: '',
 };
 
-const RecipeFormExtended = () => {
+const beautyPreferences = [
+  { label: '抗酸化作用', value: '抗酸化作用' },
+  { label: '美肌効果（透明感）', value: '美肌効果（透明感）' },
+  { label: 'コラーゲン補給', value: 'コラーゲン補給' },
+  { label: 'シミやシワ対策', value: 'シミやシワ対策' },
+  { label: '髪のツヤ改善', value: '髪のツヤ改善' },
+  {
+    label: '腸内環境を整える（デトックス）',
+    value: '腸内環境を整える（デトックス）',
+  },
+  { label: 'むくみ解消', value: 'むくみ解消' },
+  { label: 'リラックス効果', value: 'リラックス効果' },
+  { label: 'エイジングケア', value: 'エイジングケア' },
+  { label: '冷え性改善', value: '冷え性改善' },
+  { label: '免疫力アップ', value: '免疫力アップ' },
+];
+
+const skinCareOptions = [
+  { label: '保湿を重視', value: '保湿を重視' },
+  { label: '油分をコントロール', value: '油分をコントロール' },
+  { label: '透明感を高める', value: '透明感を高める' },
+  { label: '肌のキメを整える', value: '肌のキメを整える' },
+  { label: '赤みや炎症を抑える', value: '赤みや炎症を抑える' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const detoxOptions = [
+  { label: '腸活（発酵食品を活用）', value: '腸活（発酵食品を活用）' },
+  { label: 'デトックススープ', value: 'デトックススープ' },
+  { label: '体を温める食材', value: '体を温める食材' },
+  { label: '水分補給を促す', value: '水分補給を促す' },
+  { label: '低GI食品', value: '低GI食品' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const beautyFlavorOptions = [
+  { label: 'フルーティーで爽やか', value: 'フルーティーで爽やか' },
+  {
+    label: 'ハーブ風味（ミントやバジル）',
+    value: 'ハーブ風味（ミントやバジル）',
+  },
+  { label: 'レモンや柑橘系の酸味', value: 'レモンや柑橘系の酸味' },
+  { label: '優しい甘さ（蜂蜜など）', value: '優しい甘さ（蜂蜜など）' },
+  { label: '控えめな塩味', value: '控えめな塩味' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const beautyCookingMethods = [
+  { label: 'スムージーやジュース', value: 'スムージーやジュース' },
+  { label: 'スープ（温冷どちらも）', value: 'スープ（温冷どちらも）' },
+  { label: '蒸し料理（ビタミン保持）', value: '蒸し料理（ビタミン保持）' },
+  { label: 'サラダ（新鮮な野菜）', value: 'サラダ（新鮮な野菜）' },
+  { label: 'オーブンで焼く', value: 'オーブンで焼く' },
+  { label: '煮込む', value: '煮込む' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const beautyIngredientOptions = [
+  { label: 'アサイー', value: 'アサイー' },
+  { label: 'ブルーベリー', value: 'ブルーベリー' },
+  { label: 'アボカド', value: 'アボカド' },
+  { label: 'サーモン（オメガ3）', value: 'サーモン（オメガ3）' },
+  { label: 'スイートポテト', value: 'スイートポテト' },
+  { label: 'ほうれん草', value: 'ほうれん草' },
+  { label: 'トマト（リコピン）', value: 'トマト（リコピン）' },
+  { label: 'キヌア', value: 'キヌア' },
+  { label: 'ナッツ', value: 'ナッツ' },
+  { label: '豆乳', value: '豆乳' },
+  { label: 'オリーブオイル', value: 'オリーブオイル' },
+  {
+    label: '発酵食品（味噌、ヨーグルト）',
+    value: '発酵食品（味噌、ヨーグルト）',
+  },
+];
+
+const BeautyRecipeFormExtended = () => {
   const [generatedRecipe, setGeneratedRecipe] = useState<string>('');
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -130,22 +189,25 @@ const RecipeFormExtended = () => {
 
   const MAX_SELECTION = 3;
   // チェックボックスの変更ハンドラー
-  const handleCheckboxChange = (value: string, checked: boolean) => {
+  const handleCheckboxChange = (
+    name: keyof FormData,
+    value: string,
+    checked: boolean,
+  ) => {
     setFormData((prev) => {
-      const currentArray = prev.effort;
+      const currentArray = prev[name] as string[];
 
-      // 選択追加時に最大数を確認
       if (checked && currentArray.length >= MAX_SELECTION) {
         Alert.alert(
           '選択制限',
           `最大${MAX_SELECTION}つまでしか選択できません。`,
         );
-        return prev; // 制限時は変更しない
+        return prev; // 選択制限を超えた場合は何も変更しない
       }
 
       return {
         ...prev,
-        effort: checked
+        [name]: checked
           ? [...currentArray, value] // 選択を追加
           : currentArray.filter((item) => item !== value), // 選択を解除
       };
@@ -201,11 +263,11 @@ const RecipeFormExtended = () => {
         return;
       }
 
-      console.log('フォームデータ:', formData);
+      console.log('formdata:', formData);
 
       // レシピ生成 API を呼び出す
       const response = await axios.post(
-        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-recipe',
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-beauty-recipe',
         formData,
         {
           headers: {
@@ -246,8 +308,16 @@ const RecipeFormExtended = () => {
 
   // フォーム送信
   const handleSubmit = async () => {
-    if (!formData.mood) {
-      Alert.alert('気分の選択は必須です！');
+    if (
+      !formData.preferences.length &&
+      !formData.skinCare &&
+      !formData.detox &&
+      !formData.flavor &&
+      !formData.cookingMethod &&
+      !formData.ingredients.length &&
+      !formData.preferredIngredients
+    ) {
+      Alert.alert('いずれかの項目を入力してください！');
       return;
     }
     await generateRecipe();
@@ -312,67 +382,83 @@ const RecipeFormExtended = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.innerContainer}>
-          <Text style={styles.title}>🍳 あなたのこだわりレシピを作ろう</Text>
+          <Text style={styles.title}>
+            🍓 美容・アンチエイジングのこだわりポイントを選択してください
+          </Text>
 
-          <CustomSelect
-            label="今の気分😃"
-            selectedValue={formData.mood}
-            onValueChange={(value) => handleSelectChange('mood', value)}
-            options={moodOptions}
-          />
-          <CustomSelect
-            label="調理時間⏰"
-            selectedValue={formData.time}
-            onValueChange={(value) => handleSelectChange('time', value)}
-            options={cookingTimeOptions}
-          />
-          <CustomSelect
-            label="食べる時間帯🍽️"
-            selectedValue={formData.mealTime}
-            onValueChange={(value) => handleSelectChange('mealTime', value)}
-            options={mealTimeOptions}
-          />
+          {/* 美容のこだわりポイント */}
+          <Text style={styles.label}>美容のこだわりポイント💄</Text>
+          {beautyPreferences.map((option) => (
+            <CustomCheckbox
+              key={option.value}
+              value={formData.preferences.includes(option.value)}
+              onValueChange={(checked) =>
+                handleCheckboxChange('preferences', option.value, checked)
+              }
+              label={option.label}
+            />
+          ))}
 
-          {/* 予算のセレクトボックスを追加 */}
+          {/* 肌質改善のこだわり */}
           <CustomSelect
-            label="予算💰"
-            selectedValue={formData.budget}
-            onValueChange={(value) => handleSelectChange('budget', value)}
-            options={budgetOptions}
+            label="肌質改善のこだわり🧴"
+            selectedValue={formData.skinCare}
+            onValueChange={(value) => handleSelectChange('skinCare', value)}
+            options={skinCareOptions}
           />
 
-          {/* 人数のセレクトボックスを追加 */}
+          {/* デトックスや代謝促進 */}
           <CustomSelect
-            label="人数👥"
-            selectedValue={formData.people}
-            onValueChange={(value) => handleSelectChange('people', value)}
-            options={peopleOptions}
+            label="デトックスや代謝促進🌱"
+            selectedValue={formData.detox}
+            onValueChange={(value) => handleSelectChange('detox', value)}
+            options={detoxOptions}
           />
 
-          <View style={styles.section}>
-            <Text style={styles.label}>手間🖐️</Text>
-            {effortOptions.map((option: Option) => (
-              <CustomCheckbox
-                key={option.value}
-                value={formData.effort.includes(option.value)}
-                onValueChange={(checked) =>
-                  handleCheckboxChange(option.value, checked)
-                }
-                label={option.label}
-              />
-            ))}
-          </View>
+          {/* 味付けの選択肢 */}
+          <CustomSelect
+            label="味付けのこだわり🍋"
+            selectedValue={formData.flavor}
+            onValueChange={(value) => handleSelectChange('flavor', value)}
+            options={beautyFlavorOptions}
+          />
 
-          <Text style={styles.label}>使いたい食材🥕</Text>
+          {/* 調理法 */}
+          <CustomSelect
+            label="調理法🍳"
+            selectedValue={formData.cookingMethod}
+            onValueChange={(value) =>
+              handleSelectChange('cookingMethod', value)
+            }
+            options={beautyCookingMethods}
+          />
+
+          {/* 使用する食材 */}
+          <Text style={styles.label}>使用する食材🍅</Text>
+          {beautyIngredientOptions.map((option) => (
+            <CustomCheckbox
+              key={option.value}
+              value={formData.ingredients.includes(option.value)}
+              onValueChange={(checked) =>
+                handleCheckboxChange('ingredients', option.value, checked)
+              }
+              label={option.label}
+            />
+          ))}
+
+          {/* その他の食材 */}
+          <Text style={styles.label}>その他使いたい食材🥑</Text>
           <TextInput
             style={styles.input}
-            placeholder="使いたい食材 🥕 (例: 鶏肉, トマト)"
+            placeholder="その他使いたい食材 🥑 20文字以内"
             value={formData.preferredIngredients}
             maxLength={20}
             onChangeText={(value) =>
               handleInputChange('preferredIngredients', value)
             }
           />
+
+          {/* レシピ検索ボタン */}
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             {isGenerating ? (
               <ActivityIndicator color="#fff" />
@@ -383,10 +469,10 @@ const RecipeFormExtended = () => {
             )}
           </TouchableOpacity>
 
+          {/* エラーメッセージ */}
           {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
-
-        {/* ストリーミングされたレシピを表示するためのモーダル */}
+        {/* モーダル */}
         {modalOpen && (
           <RecipeModal
             open={modalOpen}
@@ -402,4 +488,4 @@ const RecipeFormExtended = () => {
   );
 };
 
-export default RecipeFormExtended;
+export default BeautyRecipeFormExtended;

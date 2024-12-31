@@ -13,49 +13,89 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
-import {
-  moodOptions,
-  cookingTimeOptions,
-  effortOptions,
-  mealTimeOptions,
-  budgetOptions,
-  peopleOptions,
-} from '../utils/options';
 import RecipeModal from './RecipeModal'; // 別ファイルからインポート
 import CustomCheckbox from './CustomCheckbox'; // カスタムチェックボックス
 import CustomSelect from './CustomSelect'; // カスタムセレクトボックス
 import supabase from '../config/supabaseClient';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
-// フォームデータの型定義
 type FormData = {
-  mood: string;
-  time: string;
-  mealTime: string;
-  budget: string;
-  effort: string[];
+  preferences: string[];
+  appearanceTheme: string;
+  cookingTime: string;
+  taste: string;
+  healthFocus: string;
   preferredIngredients: string;
-  people: string;
-  preference: string;
-};
-
-type Option = {
-  label: string;
-  value: string;
 };
 
 const initialFormData: FormData = {
-  mood: '',
-  time: '',
-  mealTime: '',
-  budget: '',
-  effort: [],
+  preferences: [],
+  appearanceTheme: '',
+  cookingTime: '',
+  taste: '',
+  healthFocus: '',
   preferredIngredients: '',
-  people: '',
-  preference: '',
 };
 
-const RecipeFormExtended = () => {
+const kidsPreferences = [
+  { label: 'カラフルで鮮やか', value: 'カラフルで鮮やか' },
+  { label: '甘い味付け', value: '甘い味付け' },
+  { label: 'サクサクした食感', value: 'サクサクした食感' },
+  { label: 'フワフワした食感', value: 'フワフワした食感' },
+  { label: 'もちもちした食感', value: 'もちもちした食感' },
+  { label: '遊び心のある見た目', value: '遊び心のある見た目' },
+  { label: '手で食べやすい', value: '手で食べやすい' },
+  { label: '野菜が隠れている', value: '野菜が隠れている' },
+  { label: '食べやすいサイズ', value: '食べやすいサイズ' },
+  { label: '片付けが簡単', value: '片付けが簡単' },
+  { label: '一品で満足できる', value: '一品で満足できる' },
+];
+
+const appearanceThemeOptions = [
+  { label: 'スマイルデザイン', value: 'スマイルデザイン' },
+  { label: '動物のシルエット', value: '動物のシルエット' },
+  { label: '星やハートの形', value: '星やハートの形' },
+  { label: '自然をイメージしたデザイン', value: '自然をイメージしたデザイン' },
+  { label: '虹色の配置', value: '虹色の配置' },
+  { label: '幾何学模様の配置', value: '幾何学模様の配置' },
+  { label: '季節感のあるトッピング', value: '季節感のあるトッピング' },
+  { label: 'レイヤー状の配置', value: 'レイヤー状の配置' },
+  { label: 'ひと口サイズで統一', value: 'ひと口サイズで統一' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const cookingTimeOptions = [
+  { label: '10分以内', value: '10分以内' },
+  { label: '20分以内', value: '20分以内' },
+  { label: '30分以内', value: '30分以内' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const tasteOptions = [
+  { label: '甘い味付け', value: '甘い味付け' },
+  { label: '塩味メイン', value: '塩味メイン' },
+  { label: 'スパイシーでない', value: 'スパイシーでない' },
+  { label: 'まろやかな味わい', value: 'まろやかな味わい' },
+  { label: 'ケチャップ味', value: 'ケチャップ味' },
+  { label: 'チーズ味', value: 'チーズ味' },
+  { label: '軽い酸味', value: '軽い酸味' },
+  { label: 'お醤油味', value: 'お醤油味' },
+  { label: 'お味噌汁風', value: 'お味噌汁風' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const healthFocusOptions = [
+  { label: '野菜を隠して取り入れる', value: '野菜を隠して取り入れる' },
+  { label: '栄養バランスを重視', value: '栄養バランスを重視' },
+  { label: '低カロリー', value: '低カロリー' },
+  { label: 'オーガニック食材', value: 'オーガニック食材' },
+  { label: 'カルシウムを増やす', value: 'カルシウムを増やす' },
+  { label: '鉄分を強化', value: '鉄分を強化' },
+  { label: '食物繊維を追加', value: '食物繊維を追加' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const LunchboxFormExtended = () => {
   const [generatedRecipe, setGeneratedRecipe] = useState<string>('');
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -130,24 +170,27 @@ const RecipeFormExtended = () => {
 
   const MAX_SELECTION = 3;
   // チェックボックスの変更ハンドラー
-  const handleCheckboxChange = (value: string, checked: boolean) => {
+  const handleCheckboxChange = (
+    name: keyof FormData,
+    value: string,
+    checked: boolean,
+  ) => {
     setFormData((prev) => {
-      const currentArray = prev.effort;
+      const currentArray = prev[name] as string[];
 
-      // 選択追加時に最大数を確認
       if (checked && currentArray.length >= MAX_SELECTION) {
         Alert.alert(
           '選択制限',
           `最大${MAX_SELECTION}つまでしか選択できません。`,
         );
-        return prev; // 制限時は変更しない
+        return prev; // 制限を超えた場合は変更しない
       }
 
       return {
         ...prev,
-        effort: checked
-          ? [...currentArray, value] // 選択を追加
-          : currentArray.filter((item) => item !== value), // 選択を解除
+        [name]: checked
+          ? [...currentArray, value] // 新しい値を追加
+          : currentArray.filter((item) => item !== value), // 値を削除
       };
     });
   };
@@ -201,11 +244,11 @@ const RecipeFormExtended = () => {
         return;
       }
 
-      console.log('フォームデータ:', formData);
+      console.log('formData:', formData);
 
       // レシピ生成 API を呼び出す
       const response = await axios.post(
-        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-recipe',
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-kids-recipe',
         formData,
         {
           headers: {
@@ -246,8 +289,15 @@ const RecipeFormExtended = () => {
 
   // フォーム送信
   const handleSubmit = async () => {
-    if (!formData.mood) {
-      Alert.alert('気分の選択は必須です！');
+    if (
+      !formData.preferences.length &&
+      !formData.appearanceTheme &&
+      !formData.cookingTime &&
+      !formData.taste &&
+      !formData.healthFocus &&
+      !formData.preferredIngredients
+    ) {
+      Alert.alert('いずれかの項目を入力してください！');
       return;
     }
     await generateRecipe();
@@ -312,67 +362,62 @@ const RecipeFormExtended = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.innerContainer}>
-          <Text style={styles.title}>🍳 あなたのこだわりレシピを作ろう</Text>
+          <Text style={styles.title}>
+            🍳 子供が喜ぶレシピのこだわりを選択してください
+          </Text>
+          <Text style={styles.label}>子供が喜ぶポイント</Text>
+          {kidsPreferences.map((option) => (
+            <CustomCheckbox
+              key={option.value}
+              value={formData.preferences.includes(option.value)}
+              onValueChange={(checked) =>
+                handleCheckboxChange('preferences', option.value, checked)
+              }
+              label={option.label}
+            />
+          ))}
 
           <CustomSelect
-            label="今の気分😃"
-            selectedValue={formData.mood}
-            onValueChange={(value) => handleSelectChange('mood', value)}
-            options={moodOptions}
+            label="見た目のテーマ🎡"
+            selectedValue={formData.appearanceTheme}
+            onValueChange={(value) =>
+              handleSelectChange('appearanceTheme', value)
+            }
+            options={appearanceThemeOptions}
           />
+
           <CustomSelect
-            label="調理時間⏰"
-            selectedValue={formData.time}
-            onValueChange={(value) => handleSelectChange('time', value)}
+            label="調理時間⌚️"
+            selectedValue={formData.cookingTime}
+            onValueChange={(value) => handleSelectChange('cookingTime', value)}
             options={cookingTimeOptions}
           />
+
           <CustomSelect
-            label="食べる時間帯🍽️"
-            selectedValue={formData.mealTime}
-            onValueChange={(value) => handleSelectChange('mealTime', value)}
-            options={mealTimeOptions}
+            label="味付けのバリエーション🧂"
+            selectedValue={formData.taste}
+            onValueChange={(value) => handleSelectChange('taste', value)}
+            options={tasteOptions}
           />
 
-          {/* 予算のセレクトボックスを追加 */}
           <CustomSelect
-            label="予算💰"
-            selectedValue={formData.budget}
-            onValueChange={(value) => handleSelectChange('budget', value)}
-            options={budgetOptions}
+            label="健康志向のこだわり💪"
+            selectedValue={formData.healthFocus}
+            onValueChange={(value) => handleSelectChange('healthFocus', value)}
+            options={healthFocusOptions}
           />
 
-          {/* 人数のセレクトボックスを追加 */}
-          <CustomSelect
-            label="人数👥"
-            selectedValue={formData.people}
-            onValueChange={(value) => handleSelectChange('people', value)}
-            options={peopleOptions}
-          />
-
-          <View style={styles.section}>
-            <Text style={styles.label}>手間🖐️</Text>
-            {effortOptions.map((option: Option) => (
-              <CustomCheckbox
-                key={option.value}
-                value={formData.effort.includes(option.value)}
-                onValueChange={(checked) =>
-                  handleCheckboxChange(option.value, checked)
-                }
-                label={option.label}
-              />
-            ))}
-          </View>
-
-          <Text style={styles.label}>使いたい食材🥕</Text>
+          <Text style={styles.label}>使いたい食材🍆</Text>
           <TextInput
             style={styles.input}
-            placeholder="使いたい食材 🥕 (例: 鶏肉, トマト)"
+            placeholder="使いたい食材 🥕 (例: 鶏肉, トマト)20文字以内"
             value={formData.preferredIngredients}
             maxLength={20}
             onChangeText={(value) =>
               handleInputChange('preferredIngredients', value)
             }
           />
+
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             {isGenerating ? (
               <ActivityIndicator color="#fff" />
@@ -385,7 +430,6 @@ const RecipeFormExtended = () => {
 
           {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
-
         {/* ストリーミングされたレシピを表示するためのモーダル */}
         {modalOpen && (
           <RecipeModal
@@ -402,4 +446,4 @@ const RecipeFormExtended = () => {
   );
 };
 
-export default RecipeFormExtended;
+export default LunchboxFormExtended;

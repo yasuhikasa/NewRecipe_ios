@@ -34,6 +34,9 @@ const CustomCheckbox: React.FC<CustomCheckboxProps> = ({
     checkedCheckbox: {
       backgroundColor: '#6200ee',
     },
+    checkboxWrapper: {
+      marginRight: isLargeScreen ? 12 : 8,
+    },
     checkmark: {
       width: isLargeScreen ? 16 : 12,
       height: isLargeScreen ? 16 : 12,
@@ -47,15 +50,19 @@ const CustomCheckbox: React.FC<CustomCheckboxProps> = ({
   });
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={() => onValueChange(!value)}
-    >
-      <View style={[styles.checkbox, value && styles.checkedCheckbox]}>
-        {value && <View style={styles.checkmark} />}
-      </View>
+    <View style={styles.container}>
+      {/* チェックボックス本体のみタッチ可能 */}
+      <TouchableOpacity
+        style={styles.checkboxWrapper}
+        onPress={() => onValueChange(!value)}
+      >
+        <View style={[styles.checkbox, value && styles.checkedCheckbox]}>
+          {value && <View style={styles.checkmark} />}
+        </View>
+      </TouchableOpacity>
+      {/* ラベル部分はタッチ不可 */}
       {label && <Text style={styles.label}>{label}</Text>}
-    </TouchableOpacity>
+    </View>
   );
 };
 

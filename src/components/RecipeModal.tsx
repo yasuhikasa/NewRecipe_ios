@@ -39,9 +39,17 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
   useEffect(() => {
     if (recipe) {
       const lines = recipe.split('\n');
-      const titleLine = lines.find((line) => line.startsWith('### レシピ名:')); // レシピ名行を探す
+      const titleLine = lines.find(
+        (line) =>
+          line.startsWith('### レシピ名:') || line.startsWith('### レシピ名'),
+      ); // 2通りの形式に対応
       if (titleLine) {
-        setTitle(titleLine.replace('### レシピ名:', '').trim()); // "### レシピ名:" を除去
+        setTitle(
+          titleLine
+            .replace('### レシピ名:', '')
+            .replace('### レシピ名', '')
+            .trim(),
+        ); // 不要な部分を除去
       }
     }
   }, [recipe]);
@@ -203,7 +211,11 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <ScrollView contentContainerStyle={styles.contentContainer}>
-            <Text style={styles.title}>生成中のレシピ 🍴</Text>
+            {isGenerating ? (
+              <Text style={styles.title}>レシピ生成中 🍴</Text>
+            ) : (
+              <Text style={styles.title}>AI監修のレシピ🍴</Text>
+            )}
 
             {isGenerating ? (
               <View style={styles.loadingContainer}>

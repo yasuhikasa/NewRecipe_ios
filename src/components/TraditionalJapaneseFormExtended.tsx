@@ -1,9 +1,7 @@
-// src/components/RecipeFormExtended.tsx
 import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -11,51 +9,79 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  TextInput,
 } from 'react-native';
 import axios from 'axios';
-import {
-  moodOptions,
-  cookingTimeOptions,
-  effortOptions,
-  mealTimeOptions,
-  budgetOptions,
-  peopleOptions,
-} from '../utils/options';
 import RecipeModal from './RecipeModal'; // 別ファイルからインポート
-import CustomCheckbox from './CustomCheckbox'; // カスタムチェックボックス
 import CustomSelect from './CustomSelect'; // カスタムセレクトボックス
 import supabase from '../config/supabaseClient';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
-// フォームデータの型定義
 type FormData = {
-  mood: string;
-  time: string;
-  mealTime: string;
-  budget: string;
-  effort: string[];
+  season: string;
+  dashi: string;
+  seasoning: string;
+  cookingMethod: string;
+  platingStyle: string;
   preferredIngredients: string;
-  people: string;
-  preference: string;
-};
-
-type Option = {
-  label: string;
-  value: string;
 };
 
 const initialFormData: FormData = {
-  mood: '',
-  time: '',
-  mealTime: '',
-  budget: '',
-  effort: [],
+  season: '',
+  dashi: '',
+  seasoning: '',
+  cookingMethod: '',
+  platingStyle: '',
   preferredIngredients: '',
-  people: '',
-  preference: '',
 };
 
-const RecipeFormExtended = () => {
+const seasonOptions = [
+  { label: '春', value: '春' },
+  { label: '夏', value: '夏' },
+  { label: '秋', value: '秋' },
+  { label: '冬', value: '冬' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const dashiOptions = [
+  { label: '鰹出汁', value: '鰹出汁' },
+  { label: '昆布出汁', value: '昆布出汁' },
+  { label: '煮干し出汁', value: '煮干し出汁' },
+  { label: '干し椎茸出汁', value: '干し椎茸出汁' },
+  { label: '合わせ出汁', value: '合わせ出汁' },
+];
+
+const seasoningOptions = [
+  { label: '薄口醤油', value: '薄口醤油' },
+  { label: '濃口醤油', value: '濃口醤油' },
+  { label: '味噌', value: '味噌' },
+  { label: 'みりん', value: 'みりん' },
+  { label: '酢', value: '酢' },
+  { label: '砂糖', value: '砂糖' },
+  { label: '酒', value: '酒' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const cookingMethodOptions = [
+  { label: '煮物', value: '煮物' },
+  { label: '焼き物', value: '焼き物' },
+  { label: '蒸し物', value: '蒸し物' },
+  { label: '揚げ物', value: '揚げ物' },
+  { label: '炊き込みご飯', value: '炊き込みご飯' },
+  { label: '汁物', value: '汁物' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const platingStyleOptions = [
+  { label: '一汁三菜', value: '一汁三菜' },
+  { label: '和モダンスタイル', value: '和モダンスタイル' },
+  { label: '伝統的な盛り付け', value: '伝統的な盛り付け' },
+  { label: '小鉢を複数使う', value: '小鉢を複数使う' },
+  { label: 'お膳スタイル', value: 'お膳スタイル' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const TraditionalJapaneseForm = () => {
   const [generatedRecipe, setGeneratedRecipe] = useState<string>('');
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -128,30 +154,6 @@ const RecipeFormExtended = () => {
     }));
   };
 
-  const MAX_SELECTION = 3;
-  // チェックボックスの変更ハンドラー
-  const handleCheckboxChange = (value: string, checked: boolean) => {
-    setFormData((prev) => {
-      const currentArray = prev.effort;
-
-      // 選択追加時に最大数を確認
-      if (checked && currentArray.length >= MAX_SELECTION) {
-        Alert.alert(
-          '選択制限',
-          `最大${MAX_SELECTION}つまでしか選択できません。`,
-        );
-        return prev; // 制限時は変更しない
-      }
-
-      return {
-        ...prev,
-        effort: checked
-          ? [...currentArray, value] // 選択を追加
-          : currentArray.filter((item) => item !== value), // 選択を解除
-      };
-    });
-  };
-
   // テキストフィールドの変更ハンドラー
   const handleInputChange = (name: keyof FormData, value: string) => {
     setFormData((prev) => ({
@@ -201,11 +203,10 @@ const RecipeFormExtended = () => {
         return;
       }
 
-      console.log('フォームデータ:', formData);
-
+      console.log('formData:', formData);
       // レシピ生成 API を呼び出す
       const response = await axios.post(
-        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-recipe',
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-japanese-recipe',
         formData,
         {
           headers: {
@@ -246,8 +247,14 @@ const RecipeFormExtended = () => {
 
   // フォーム送信
   const handleSubmit = async () => {
-    if (!formData.mood) {
-      Alert.alert('気分の選択は必須です！');
+    if (
+      !formData.season &&
+      !formData.dashi &&
+      !formData.seasoning &&
+      !formData.cookingMethod &&
+      !formData.platingStyle
+    ) {
+      Alert.alert('いずれかの項目を入力してください！');
       return;
     }
     await generateRecipe();
@@ -312,61 +319,45 @@ const RecipeFormExtended = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.innerContainer}>
-          <Text style={styles.title}>🍳 あなたのこだわりレシピを作ろう</Text>
-
+          <Text style={styles.title}>
+            🍶 和食レシピのこだわりを選んでください
+          </Text>
           <CustomSelect
-            label="今の気分😃"
-            selectedValue={formData.mood}
-            onValueChange={(value) => handleSelectChange('mood', value)}
-            options={moodOptions}
+            label="季節（提案する食材の季節）🌸"
+            selectedValue={formData.season}
+            onValueChange={(value) => handleSelectChange('season', value)}
+            options={seasonOptions}
           />
           <CustomSelect
-            label="調理時間⏰"
-            selectedValue={formData.time}
-            onValueChange={(value) => handleSelectChange('time', value)}
-            options={cookingTimeOptions}
+            label="出汁の種類🍲"
+            selectedValue={formData.dashi}
+            onValueChange={(value) => handleSelectChange('dashi', value)}
+            options={dashiOptions}
           />
           <CustomSelect
-            label="食べる時間帯🍽️"
-            selectedValue={formData.mealTime}
-            onValueChange={(value) => handleSelectChange('mealTime', value)}
-            options={mealTimeOptions}
+            label="調味料のこだわり🍶"
+            selectedValue={formData.seasoning}
+            onValueChange={(value) => handleSelectChange('seasoning', value)}
+            options={seasoningOptions}
           />
-
-          {/* 予算のセレクトボックスを追加 */}
           <CustomSelect
-            label="予算💰"
-            selectedValue={formData.budget}
-            onValueChange={(value) => handleSelectChange('budget', value)}
-            options={budgetOptions}
+            label="調理法🔪"
+            selectedValue={formData.cookingMethod}
+            onValueChange={(value) =>
+              handleSelectChange('cookingMethod', value)
+            }
+            options={cookingMethodOptions}
           />
-
-          {/* 人数のセレクトボックスを追加 */}
           <CustomSelect
-            label="人数👥"
-            selectedValue={formData.people}
-            onValueChange={(value) => handleSelectChange('people', value)}
-            options={peopleOptions}
+            label="盛り付けスタイル🍱"
+            selectedValue={formData.platingStyle}
+            onValueChange={(value) => handleSelectChange('platingStyle', value)}
+            options={platingStyleOptions}
           />
-
-          <View style={styles.section}>
-            <Text style={styles.label}>手間🖐️</Text>
-            {effortOptions.map((option: Option) => (
-              <CustomCheckbox
-                key={option.value}
-                value={formData.effort.includes(option.value)}
-                onValueChange={(checked) =>
-                  handleCheckboxChange(option.value, checked)
-                }
-                label={option.label}
-              />
-            ))}
-          </View>
-
-          <Text style={styles.label}>使いたい食材🥕</Text>
+          <Text style={styles.label}>使いたい食材🐟</Text>
           <TextInput
             style={styles.input}
-            placeholder="使いたい食材 🥕 (例: 鶏肉, トマト)"
+            placeholder="使いたい食材 🥕 (例: 筍, 秋刀魚)20文字以内"
             value={formData.preferredIngredients}
             maxLength={20}
             onChangeText={(value) =>
@@ -382,11 +373,9 @@ const RecipeFormExtended = () => {
               </Text>
             )}
           </TouchableOpacity>
-
           {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
-
-        {/* ストリーミングされたレシピを表示するためのモーダル */}
+        {/* モーダル */}
         {modalOpen && (
           <RecipeModal
             open={modalOpen}
@@ -402,4 +391,4 @@ const RecipeFormExtended = () => {
   );
 };
 
-export default RecipeFormExtended;
+export default TraditionalJapaneseForm;

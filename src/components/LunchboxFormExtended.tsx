@@ -13,49 +13,107 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
-import {
-  moodOptions,
-  cookingTimeOptions,
-  effortOptions,
-  mealTimeOptions,
-  budgetOptions,
-  peopleOptions,
-} from '../utils/options';
 import RecipeModal from './RecipeModal'; // 別ファイルからインポート
 import CustomCheckbox from './CustomCheckbox'; // カスタムチェックボックス
 import CustomSelect from './CustomSelect'; // カスタムセレクトボックス
 import supabase from '../config/supabaseClient';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
-// フォームデータの型定義
 type FormData = {
-  mood: string;
-  time: string;
-  mealTime: string;
-  budget: string;
-  effort: string[];
+  preferences: string[];
+  bentoBoxType: string;
+  cookingTime: string;
+  ingredientType: string;
+  flavor: string;
+  storageMethod: string;
   preferredIngredients: string;
-  people: string;
-  preference: string;
-};
-
-type Option = {
-  label: string;
-  value: string;
 };
 
 const initialFormData: FormData = {
-  mood: '',
-  time: '',
-  mealTime: '',
-  budget: '',
-  effort: [],
+  preferences: [],
+  bentoBoxType: '',
+  cookingTime: '',
+  ingredientType: '',
+  flavor: '',
+  storageMethod: '',
   preferredIngredients: '',
-  people: '',
-  preference: '',
 };
 
-const RecipeFormExtended = () => {
+const bentoPreferences = [
+  { label: '冷めても美味しい', value: '冷めても美味しい' },
+  { label: '作り置き可能', value: '作り置き可能' },
+  { label: '崩れにくい', value: '崩れにくい' },
+  { label: '見た目重視', value: '見た目重視' },
+  { label: '野菜を多めに', value: '野菜を多めに' },
+  { label: '詰めやすい形状', value: '詰めやすい形状' },
+  { label: 'ヘルシー志向', value: 'ヘルシー志向' },
+  { label: 'ボリューム満点', value: 'ボリューム満点' },
+  { label: '簡単手軽', value: '簡単手軽' },
+  { label: '高タンパク', value: '高タンパク' },
+  { label: '低カロリー', value: '低カロリー' },
+  { label: '塩分控えめ', value: '塩分控えめ' },
+  { label: '甘めの味付け', value: '甘めの味付け' },
+  { label: '辛めの味付け', value: '辛めの味付け' },
+];
+
+const bentoBoxOptions = [
+  { label: '普通サイズ', value: '普通サイズ' },
+  { label: '大容量', value: '大容量' },
+  { label: '小分け容器', value: '小分け容器' },
+  { label: 'ランチジャー', value: 'ランチジャー' },
+  { label: 'おにぎり専用', value: 'おにぎり専用' },
+  { label: 'サラダボックス', value: 'サラダボックス' },
+  { label: 'キャラ弁用', value: 'キャラ弁用' },
+  { label: 'アウトドア用', value: 'アウトドア用' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const cookingTimeOptions = [
+  { label: '10分以内', value: '10分以内' },
+  { label: '20分以内', value: '20分以内' },
+  { label: '30分以内', value: '30分以内' },
+  { label: '1時間以内', value: '1時間以内' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const ingredientTypeOptions = [
+  { label: '主菜（肉）', value: '主菜（肉）' },
+  { label: '主菜（魚）', value: '主菜（魚）' },
+  { label: '副菜（野菜）', value: '副菜（野菜）' },
+  { label: '炭水化物（ご飯やパン）', value: '炭水化物（ご飯やパン）' },
+  { label: '豆類やナッツ', value: '豆類やナッツ' },
+  { label: '卵料理', value: '卵料理' },
+  { label: '乳製品', value: '乳製品' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const flavorOptions = [
+  { label: '和風（醤油ベース）', value: '和風（醤油ベース）' },
+  { label: '和風（味噌や砂糖）', value: '和風（味噌や砂糖）' },
+  { label: '洋風（ハーブやバター）', value: '洋風（ハーブやバター）' },
+  { label: '洋風（トマトソース）', value: '洋風（トマトソース）' },
+  { label: '中華風（醤油ベース）', value: '中華風（醤油ベース）' },
+  { label: '中華風（オイスターソース）', value: '中華風（オイスターソース）' },
+  {
+    label: 'エスニック風（カレー粉、スパイス）',
+    value: 'エスニック風（カレー粉、スパイス）',
+  },
+  { label: '甘辛い味付け（照り焼き風）', value: '甘辛い味付け（照り焼き風）' },
+  { label: '塩味メイン', value: '塩味メイン' },
+  { label: 'スパイシー', value: 'スパイシー' },
+  { label: 'さっぱり系', value: 'さっぱり系' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const storageMethodOptions = [
+  { label: '冷蔵保存可能', value: '冷蔵保存可能' },
+  { label: '冷凍保存可能', value: '冷凍保存可能' },
+  { label: '当日中に消費', value: '当日中に消費' },
+  { label: '電子レンジ加熱対応', value: '電子レンジ加熱対応' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const LunchboxFormExtended = () => {
   const [generatedRecipe, setGeneratedRecipe] = useState<string>('');
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -130,22 +188,25 @@ const RecipeFormExtended = () => {
 
   const MAX_SELECTION = 3;
   // チェックボックスの変更ハンドラー
-  const handleCheckboxChange = (value: string, checked: boolean) => {
+  const handleCheckboxChange = (
+    name: keyof FormData,
+    value: string,
+    checked: boolean,
+  ) => {
     setFormData((prev) => {
-      const currentArray = prev.effort;
+      const currentArray = prev[name] as string[];
 
-      // 選択追加時に最大数を確認
       if (checked && currentArray.length >= MAX_SELECTION) {
         Alert.alert(
           '選択制限',
           `最大${MAX_SELECTION}つまでしか選択できません。`,
         );
-        return prev; // 制限時は変更しない
+        return prev; // 選択制限を超えた場合は何も変更しない
       }
 
       return {
         ...prev,
-        effort: checked
+        [name]: checked
           ? [...currentArray, value] // 選択を追加
           : currentArray.filter((item) => item !== value), // 選択を解除
       };
@@ -201,11 +262,11 @@ const RecipeFormExtended = () => {
         return;
       }
 
-      console.log('フォームデータ:', formData);
+      console.log('formData:', formData);
 
       // レシピ生成 API を呼び出す
       const response = await axios.post(
-        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-recipe',
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-lunchbox',
         formData,
         {
           headers: {
@@ -246,8 +307,15 @@ const RecipeFormExtended = () => {
 
   // フォーム送信
   const handleSubmit = async () => {
-    if (!formData.mood) {
-      Alert.alert('気分の選択は必須です！');
+    if (
+      !formData.preferences.length &&
+      !formData.bentoBoxType &&
+      !formData.cookingTime &&
+      !formData.ingredientType &&
+      !formData.flavor &&
+      !formData.storageMethod
+    ) {
+      Alert.alert('いずれかの項目を入力してください！');
       return;
     }
     await generateRecipe();
@@ -312,80 +380,75 @@ const RecipeFormExtended = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.innerContainer}>
-          <Text style={styles.title}>🍳 あなたのこだわりレシピを作ろう</Text>
-
+          <Text style={styles.title}>
+            🍳 あなたのこだわりお弁当レシピを作ろう
+          </Text>
+          <Text style={styles.label}>お弁当のこだわり</Text>
+          {bentoPreferences.map((option) => (
+            <CustomCheckbox
+              key={option.value}
+              value={formData.preferences.includes(option.value)}
+              onValueChange={(checked) =>
+                handleCheckboxChange('preferences', option.value, checked)
+              }
+              label={option.label}
+            />
+          ))}
           <CustomSelect
-            label="今の気分😃"
-            selectedValue={formData.mood}
-            onValueChange={(value) => handleSelectChange('mood', value)}
-            options={moodOptions}
+            label="お弁当箱のタイプ🍱"
+            selectedValue={formData.bentoBoxType}
+            onValueChange={(value) => handleSelectChange('bentoBoxType', value)}
+            options={bentoBoxOptions}
           />
           <CustomSelect
-            label="調理時間⏰"
-            selectedValue={formData.time}
-            onValueChange={(value) => handleSelectChange('time', value)}
+            label="調理時間🕰️"
+            selectedValue={formData.cookingTime}
+            onValueChange={(value) => handleSelectChange('cookingTime', value)}
             options={cookingTimeOptions}
           />
           <CustomSelect
-            label="食べる時間帯🍽️"
-            selectedValue={formData.mealTime}
-            onValueChange={(value) => handleSelectChange('mealTime', value)}
-            options={mealTimeOptions}
+            label="食材のタイプ🍖"
+            selectedValue={formData.ingredientType}
+            onValueChange={(value) =>
+              handleSelectChange('ingredientType', value)
+            }
+            options={ingredientTypeOptions}
           />
-
-          {/* 予算のセレクトボックスを追加 */}
           <CustomSelect
-            label="予算💰"
-            selectedValue={formData.budget}
-            onValueChange={(value) => handleSelectChange('budget', value)}
-            options={budgetOptions}
+            label="味付けのバリエーション🧂"
+            selectedValue={formData.flavor}
+            onValueChange={(value) => handleSelectChange('flavor', value)}
+            options={flavorOptions}
           />
-
-          {/* 人数のセレクトボックスを追加 */}
           <CustomSelect
-            label="人数👥"
-            selectedValue={formData.people}
-            onValueChange={(value) => handleSelectChange('people', value)}
-            options={peopleOptions}
+            label="保存方法🧊"
+            selectedValue={formData.storageMethod}
+            onValueChange={(value) =>
+              handleSelectChange('storageMethod', value)
+            }
+            options={storageMethodOptions}
           />
-
-          <View style={styles.section}>
-            <Text style={styles.label}>手間🖐️</Text>
-            {effortOptions.map((option: Option) => (
-              <CustomCheckbox
-                key={option.value}
-                value={formData.effort.includes(option.value)}
-                onValueChange={(checked) =>
-                  handleCheckboxChange(option.value, checked)
-                }
-                label={option.label}
-              />
-            ))}
-          </View>
-
-          <Text style={styles.label}>使いたい食材🥕</Text>
+          <Text style={styles.label}>使いたい食材🍱</Text>
           <TextInput
             style={styles.input}
-            placeholder="使いたい食材 🥕 (例: 鶏肉, トマト)"
+            placeholder="使いたい食材 🥕 (例: 鶏肉, トマト)20文字以内"
             value={formData.preferredIngredients}
             maxLength={20}
             onChangeText={(value) =>
               handleInputChange('preferredIngredients', value)
             }
           />
+
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             {isGenerating ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.submitButtonText}>
-                レシピを作る（約10秒） 🚀
-              </Text>
+              <Text style={styles.submitButtonText}>レシピを作る 🚀</Text>
             )}
           </TouchableOpacity>
 
           {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
-
         {/* ストリーミングされたレシピを表示するためのモーダル */}
         {modalOpen && (
           <RecipeModal
@@ -402,4 +465,4 @@ const RecipeFormExtended = () => {
   );
 };
 
-export default RecipeFormExtended;
+export default LunchboxFormExtended;

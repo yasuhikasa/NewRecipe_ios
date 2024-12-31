@@ -49,11 +49,13 @@ const HowToUseScreen: React.FC = () => {
 
       <Text style={styles.text}>
         このアプリは各テンプレートに従って項目を埋めてあなた自身のこだわりレシピを作成するアプリケーションです。
+        {'\n\n'}
         こだわりに基づいてAIがこだわり内容を認識してレシピを作成します。
       </Text>
 
       <Text style={styles.text}>
         気に入ったらレシピを保存して実際に料理を楽しんでもらうというコンセプトです。
+        {'\n\n'}
         レシピが増えたら、任意にラベルを追加してカテゴリごとにレシピを整理することもできます。
       </Text>
 
@@ -82,6 +84,10 @@ const HowToUseScreen: React.FC = () => {
       <Text style={styles.text}>
         今後、こだわりを選択するテンプレートを拡張していこうと思っておりますので、よろしくお願いいたします。
         フィードバックもお待ちしております。
+      </Text>
+      <Text style={styles.title}>レシピのデザインについて</Text>
+      <Text style={styles.text}>
+        統一のデザインになるようAIを調整していますが、時々レイアウトが微妙に変更されることがあります。ご了承ください。
       </Text>
     </ScrollView>
   );

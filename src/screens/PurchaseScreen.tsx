@@ -18,20 +18,29 @@ import RNIap, {
   purchaseUpdatedListener,
   purchaseErrorListener,
 } from 'react-native-iap';
+import { useNavigation } from '@react-navigation/native';
 import supabase from '../config/supabaseClient';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
+import { RootStackParamList } from '../types/types';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 const skuToPointsMap: Record<string, number> = {
-  'com.evample.recipe.points_100': 40,
-  'com.evample.recipe.points_200': 100,
+  'com.example.recipe.points_100': 40,
+  'com.example.recipe.points_200': 100,
 };
+
+type PurchaseScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'Purchase'
+>;
 
 const PurchaseScreen: React.FC = () => {
   const [products, setProducts] = useState<IAPProduct[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const screenWidth = Dimensions.get('window').width;
+  const [isLoading, setIsLoading] = useState(true);
   const { isLandscape } = useDeviceOrientation();
-
+  const navigation = useNavigation<PurchaseScreenNavigationProp>();
   const isLargeScreen = screenWidth > 768; // iPadかどうか判定
 
   useEffect(() => {
@@ -41,12 +50,15 @@ const PurchaseScreen: React.FC = () => {
         await initConnection();
         console.log('IAP connection initialized.');
 
+        setIsLoading(true); // ローディング開始
         const items = await getProducts({ skus: Object.keys(skuToPointsMap) });
         console.log('Fetched products:', items);
         setProducts(items);
       } catch (error) {
         console.error('IAP Initialization Failed:', error);
         Alert.alert('エラー', 'IAPの初期化に失敗しました');
+      } finally {
+        setIsLoading(false); // ローディング終了
       }
     };
 
@@ -71,6 +83,7 @@ const PurchaseScreen: React.FC = () => {
 
           console.log('Transaction finished successfully.');
           Alert.alert('購入成功', 'ポイントが追加されました！');
+          navigation.goBack();
         } catch (err) {
           console.error('Finish Transaction Failed:', err);
         } finally {
@@ -91,7 +104,7 @@ const PurchaseScreen: React.FC = () => {
       purchaseUpdateSubscription.remove();
       purchaseErrorSubscription.remove();
     };
-  }, []);
+  }, [navigation]);
 
   const updatePointsInSupabase = async (pointsToAdd: number): Promise<void> => {
     try {
@@ -185,25 +198,39 @@ const PurchaseScreen: React.FC = () => {
       color: '#FFFFFF',
       textAlign: 'center',
     },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
   });
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>ポイント購入</Text>
-      {products.map((product) => (
-        <View key={product.productId} style={styles.item}>
-          <Text style={styles.description}>
-            {product.title || product.localizedPrice}
-          </Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => handlePurchase(product.productId)}
-            disabled={isProcessing}
-          >
-            <Text style={styles.buttonText}>購入</Text>
-          </TouchableOpacity>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF7043" />
+          <Text>商品情報を取得中です...</Text>
         </View>
-      ))}
+      ) : (
+        <>
+          <Text style={styles.title}>ポイント購入</Text>
+          {products.map((product) => (
+            <View key={product.productId} style={styles.item}>
+              <Text style={styles.description}>
+                {product.title || product.localizedPrice}
+              </Text>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => handlePurchase(product.productId)}
+                disabled={isProcessing}
+              >
+                <Text style={styles.buttonText}>購入</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </>
+      )}
       <Modal visible={isProcessing} transparent animationType="fade">
         <View style={styles.modalContainer}>
           <ActivityIndicator size="large" color="#FF7043" />

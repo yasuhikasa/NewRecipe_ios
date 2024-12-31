@@ -13,49 +13,99 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
-import {
-  moodOptions,
-  cookingTimeOptions,
-  effortOptions,
-  mealTimeOptions,
-  budgetOptions,
-  peopleOptions,
-} from '../utils/options';
 import RecipeModal from './RecipeModal'; // 別ファイルからインポート
 import CustomCheckbox from './CustomCheckbox'; // カスタムチェックボックス
 import CustomSelect from './CustomSelect'; // カスタムセレクトボックス
 import supabase from '../config/supabaseClient';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
-// フォームデータの型定義
 type FormData = {
-  mood: string;
-  time: string;
-  mealTime: string;
-  budget: string;
-  effort: string[];
+  preferences: string[];
+  dietFlavor: string;
+  cookingTime: string;
+  dietCookingMethods: string;
+  dietIngredient: string[];
   preferredIngredients: string;
-  people: string;
-  preference: string;
-};
-
-type Option = {
-  label: string;
-  value: string;
 };
 
 const initialFormData: FormData = {
-  mood: '',
-  time: '',
-  mealTime: '',
-  budget: '',
-  effort: [],
+  preferences: [],
+  dietFlavor: '',
+  cookingTime: '',
+  dietCookingMethods: '',
+  dietIngredient: [],
   preferredIngredients: '',
-  people: '',
-  preference: '',
 };
 
-const RecipeFormExtended = () => {
+const dietPreferences = [
+  { label: '低糖質', value: '低糖質' },
+  { label: '高タンパク', value: '高タンパク' },
+  { label: 'ローカロリー', value: 'ローカロリー' },
+  { label: '食物繊維を多く含む', value: '食物繊維を多く含む' },
+  { label: '脂質を抑えたメニュー', value: '脂質を抑えたメニュー' },
+  { label: '満腹感を重視', value: '満腹感を重視' },
+  { label: 'グルテンフリー', value: 'グルテンフリー' },
+  { label: 'ビーガン対応', value: 'ビーガン対応' },
+  { label: '糖質制限対応', value: '糖質制限対応' },
+  { label: 'カロリーコントロール', value: 'カロリーコントロール' },
+];
+
+const dietFlavorOptions = [
+  { label: 'さっぱり系', value: 'さっぱり系' },
+  { label: 'ピリ辛', value: 'ピリ辛' },
+  { label: 'ハーブやスパイス風味', value: 'ハーブやスパイス風味' },
+  { label: '塩味が控えめ', value: '塩味が控えめ' },
+  { label: '和風（醤油や味噌）', value: '和風（醤油や味噌）' },
+  { label: '洋風（バターやクリーム）', value: '洋風（バターやクリーム）' },
+  {
+    label: 'エスニック（ココナッツやカレー）',
+    value: 'エスニック（ココナッツやカレー）',
+  },
+  { label: '酸味を活かした味付け', value: '酸味を活かした味付け' },
+  { label: '甘辛い味付け', value: '甘辛い味付け' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const cookingTimeOptions = [
+  { label: '10分以内', value: '10分以内' },
+  { label: '20分以内', value: '20分以内' },
+  { label: '30分以内', value: '30分以内' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const dietCookingMethods = [
+  { label: '蒸し料理', value: '蒸し料理' },
+  { label: 'グリル', value: 'グリル' },
+  { label: 'スープ', value: 'スープ' },
+  { label: 'サラダ', value: 'サラダ' },
+  { label: 'ボウルスタイル', value: 'ボウルスタイル' },
+  { label: 'ロースト', value: 'ロースト' },
+  { label: '炒め料理', value: '炒め料理' },
+  { label: 'オーブン料理', value: 'オーブン料理' },
+  { label: '簡単な電子レンジ料理', value: '簡単な電子レンジ料理' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const dietIngredientOptions = [
+  { label: '鶏胸肉', value: '鶏胸肉' },
+  { label: 'サーモン', value: 'サーモン' },
+  { label: 'ブロッコリー', value: 'ブロッコリー' },
+  { label: 'アボカド', value: 'アボカド' },
+  { label: '卵', value: '卵' },
+  { label: '玄米', value: '玄米' },
+  { label: '豆腐', value: '豆腐' },
+  { label: 'ほうれん草', value: 'ほうれん草' },
+  { label: 'トマト', value: 'トマト' },
+  { label: 'ズッキーニ', value: 'ズッキーニ' },
+  { label: 'キヌア', value: 'キヌア' },
+  { label: 'ナッツ', value: 'ナッツ' },
+  { label: '鶏ささみ', value: '鶏ささみ' },
+  { label: 'カリフラワー', value: 'カリフラワー' },
+  { label: 'ヨーグルト', value: 'ヨーグルト' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const DietRecipeFormExtended = () => {
   const [generatedRecipe, setGeneratedRecipe] = useState<string>('');
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -130,24 +180,27 @@ const RecipeFormExtended = () => {
 
   const MAX_SELECTION = 3;
   // チェックボックスの変更ハンドラー
-  const handleCheckboxChange = (value: string, checked: boolean) => {
+  const handleCheckboxChange = (
+    name: keyof FormData,
+    value: string,
+    checked: boolean,
+  ) => {
     setFormData((prev) => {
-      const currentArray = prev.effort;
+      const currentArray = prev[name] as string[];
 
-      // 選択追加時に最大数を確認
       if (checked && currentArray.length >= MAX_SELECTION) {
         Alert.alert(
           '選択制限',
           `最大${MAX_SELECTION}つまでしか選択できません。`,
         );
-        return prev; // 制限時は変更しない
+        return prev; // 制限を超えた場合は変更しない
       }
 
       return {
         ...prev,
-        effort: checked
-          ? [...currentArray, value] // 選択を追加
-          : currentArray.filter((item) => item !== value), // 選択を解除
+        [name]: checked
+          ? [...currentArray, value] // 新しい値を追加
+          : currentArray.filter((item) => item !== value), // 値を削除
       };
     });
   };
@@ -201,11 +254,11 @@ const RecipeFormExtended = () => {
         return;
       }
 
-      console.log('フォームデータ:', formData);
+      console.log('formData:', formData);
 
       // レシピ生成 API を呼び出す
       const response = await axios.post(
-        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-recipe',
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-diet-recipe',
         formData,
         {
           headers: {
@@ -246,8 +299,15 @@ const RecipeFormExtended = () => {
 
   // フォーム送信
   const handleSubmit = async () => {
-    if (!formData.mood) {
-      Alert.alert('気分の選択は必須です！');
+    if (
+      !formData.preferences.length &&
+      !formData.dietFlavor &&
+      !formData.cookingTime &&
+      !formData.dietCookingMethods &&
+      !formData.dietIngredient.length &&
+      !formData.preferredIngredients
+    ) {
+      Alert.alert('いずれかの項目を入力してください！');
       return;
     }
     await generateRecipe();
@@ -312,67 +372,67 @@ const RecipeFormExtended = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.innerContainer}>
-          <Text style={styles.title}>🍳 あなたのこだわりレシピを作ろう</Text>
+          <Text style={styles.title}>
+            🍳 ダイエットレシピのこだわりを選択してください
+          </Text>
+          <Text style={styles.label}>ダイエットのこだわりポイント💪</Text>
+          {dietPreferences.map((option) => (
+            <CustomCheckbox
+              key={option.value}
+              value={formData.preferences.includes(option.value)}
+              onValueChange={(checked) =>
+                handleCheckboxChange('preferences', option.value, checked)
+              }
+              label={option.label}
+            />
+          ))}
 
           <CustomSelect
-            label="今の気分😃"
-            selectedValue={formData.mood}
-            onValueChange={(value) => handleSelectChange('mood', value)}
-            options={moodOptions}
+            label="味付けのこだわり🧀"
+            selectedValue={formData.dietFlavor}
+            onValueChange={(value) => handleSelectChange('dietFlavor', value)}
+            options={dietFlavorOptions}
           />
+
           <CustomSelect
-            label="調理時間⏰"
-            selectedValue={formData.time}
-            onValueChange={(value) => handleSelectChange('time', value)}
+            label="調理時間⌚️"
+            selectedValue={formData.cookingTime}
+            onValueChange={(value) => handleSelectChange('cookingTime', value)}
             options={cookingTimeOptions}
           />
+
           <CustomSelect
-            label="食べる時間帯🍽️"
-            selectedValue={formData.mealTime}
-            onValueChange={(value) => handleSelectChange('mealTime', value)}
-            options={mealTimeOptions}
+            label="調理法🫕"
+            selectedValue={formData.dietCookingMethods}
+            onValueChange={(value) =>
+              handleSelectChange('dietCookingMethods', value)
+            }
+            options={dietCookingMethods}
           />
 
-          {/* 予算のセレクトボックスを追加 */}
-          <CustomSelect
-            label="予算💰"
-            selectedValue={formData.budget}
-            onValueChange={(value) => handleSelectChange('budget', value)}
-            options={budgetOptions}
-          />
+          <Text style={styles.label}>使用する食材🐓</Text>
+          {dietIngredientOptions.map((option) => (
+            <CustomCheckbox
+              key={option.value}
+              value={formData.dietIngredient.includes(option.value)}
+              onValueChange={(checked) =>
+                handleCheckboxChange('dietIngredient', option.value, checked)
+              }
+              label={option.label}
+            />
+          ))}
 
-          {/* 人数のセレクトボックスを追加 */}
-          <CustomSelect
-            label="人数👥"
-            selectedValue={formData.people}
-            onValueChange={(value) => handleSelectChange('people', value)}
-            options={peopleOptions}
-          />
-
-          <View style={styles.section}>
-            <Text style={styles.label}>手間🖐️</Text>
-            {effortOptions.map((option: Option) => (
-              <CustomCheckbox
-                key={option.value}
-                value={formData.effort.includes(option.value)}
-                onValueChange={(checked) =>
-                  handleCheckboxChange(option.value, checked)
-                }
-                label={option.label}
-              />
-            ))}
-          </View>
-
-          <Text style={styles.label}>使いたい食材🥕</Text>
+          <Text style={styles.label}>その他使いたい食材🥕</Text>
           <TextInput
             style={styles.input}
-            placeholder="使いたい食材 🥕 (例: 鶏肉, トマト)"
+            placeholder="その他使いたい食材 🥕 20文字以内"
             value={formData.preferredIngredients}
             maxLength={20}
             onChangeText={(value) =>
               handleInputChange('preferredIngredients', value)
             }
           />
+
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             {isGenerating ? (
               <ActivityIndicator color="#fff" />
@@ -385,7 +445,6 @@ const RecipeFormExtended = () => {
 
           {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
-
         {/* ストリーミングされたレシピを表示するためのモーダル */}
         {modalOpen && (
           <RecipeModal
@@ -402,4 +461,4 @@ const RecipeFormExtended = () => {
   );
 };
 
-export default RecipeFormExtended;
+export default DietRecipeFormExtended;

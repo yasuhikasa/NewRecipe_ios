@@ -1,9 +1,7 @@
-// src/components/RecipeFormExtended.tsx
 import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -13,49 +11,78 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
-import {
-  moodOptions,
-  cookingTimeOptions,
-  effortOptions,
-  mealTimeOptions,
-  budgetOptions,
-  peopleOptions,
-} from '../utils/options';
-import RecipeModal from './RecipeModal'; // 別ファイルからインポート
-import CustomCheckbox from './CustomCheckbox'; // カスタムチェックボックス
-import CustomSelect from './CustomSelect'; // カスタムセレクトボックス
+import RecipeModal from './RecipeModal';
+import CustomSelect from './CustomSelect';
 import supabase from '../config/supabaseClient';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
-// フォームデータの型定義
 type FormData = {
-  mood: string;
-  time: string;
-  mealTime: string;
-  budget: string;
-  effort: string[];
-  preferredIngredients: string;
-  people: string;
-  preference: string;
-};
-
-type Option = {
-  label: string;
-  value: string;
+  baseAlcohol: string;
+  flavorProfile: string;
+  garnish: string;
+  style: string;
+  strength: string;
 };
 
 const initialFormData: FormData = {
-  mood: '',
-  time: '',
-  mealTime: '',
-  budget: '',
-  effort: [],
-  preferredIngredients: '',
-  people: '',
-  preference: '',
+  baseAlcohol: '',
+  flavorProfile: '',
+  garnish: '',
+  style: '',
+  strength: '',
 };
 
-const RecipeFormExtended = () => {
+const baseAlcoholOptions = [
+  { label: 'ウォッカ', value: 'ウォッカ' },
+  { label: 'ジン', value: 'ジン' },
+  { label: 'ラム', value: 'ラム' },
+  { label: 'テキーラ', value: 'テキーラ' },
+  { label: 'ウイスキー', value: 'ウイスキー' },
+  { label: 'ブランデー', value: 'ブランデー' },
+  { label: 'リキュール', value: 'リキュール' },
+  { label: 'ノンアルコール', value: 'ノンアルコール' },
+];
+
+const flavorProfileOptions = [
+  { label: 'フルーティー', value: 'フルーティー' },
+  { label: 'ハーバル', value: 'ハーバル' },
+  { label: 'スモーキー', value: 'スモーキー' },
+  { label: 'スパイシー', value: 'スパイシー' },
+  { label: 'チョコレート風味', value: 'チョコレート風味' },
+  { label: '酸味が強い', value: '酸味が強い' },
+  { label: '甘さ控えめ', value: '甘さ控えめ' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const garnishOptions = [
+  { label: 'ライム', value: 'ライム' },
+  { label: 'レモン', value: 'レモン' },
+  { label: 'オレンジ', value: 'オレンジ' },
+  { label: 'ベリー類', value: 'ベリー類' },
+  { label: 'パイナップル', value: 'パイナップル' },
+  { label: 'キュウリ', value: 'キュウリ' },
+  { label: 'ミント', value: 'ミント' },
+  { label: 'ローズマリー', value: 'ローズマリー' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const styleOptions = [
+  { label: 'クラシック', value: 'クラシック' },
+  { label: 'トロピカル', value: 'トロピカル' },
+  { label: 'シンプルで洗練された', value: 'シンプルで洗練された' },
+  { label: '層を作るビジュアル', value: '層を作るビジュアル' },
+  { label: 'ロックグラスでシックに', value: 'ロックグラスでシックに' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const strengthOptions = [
+  { label: 'ライト', value: 'ライト' },
+  { label: 'ミディアム', value: 'ミディアム' },
+  { label: 'ストロング', value: 'ストロング' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const CocktailForm = () => {
   const [generatedRecipe, setGeneratedRecipe] = useState<string>('');
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -128,38 +155,6 @@ const RecipeFormExtended = () => {
     }));
   };
 
-  const MAX_SELECTION = 3;
-  // チェックボックスの変更ハンドラー
-  const handleCheckboxChange = (value: string, checked: boolean) => {
-    setFormData((prev) => {
-      const currentArray = prev.effort;
-
-      // 選択追加時に最大数を確認
-      if (checked && currentArray.length >= MAX_SELECTION) {
-        Alert.alert(
-          '選択制限',
-          `最大${MAX_SELECTION}つまでしか選択できません。`,
-        );
-        return prev; // 制限時は変更しない
-      }
-
-      return {
-        ...prev,
-        effort: checked
-          ? [...currentArray, value] // 選択を追加
-          : currentArray.filter((item) => item !== value), // 選択を解除
-      };
-    });
-  };
-
-  // テキストフィールドの変更ハンドラー
-  const handleInputChange = (name: keyof FormData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
     const pointsToConsume = 2; // レシピ1回あたり消費するポイント
@@ -201,11 +196,11 @@ const RecipeFormExtended = () => {
         return;
       }
 
-      console.log('フォームデータ:', formData);
+      console.log('formData:', formData);
 
       // レシピ生成 API を呼び出す
       const response = await axios.post(
-        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-recipe',
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-cocktail-recipe',
         formData,
         {
           headers: {
@@ -246,8 +241,8 @@ const RecipeFormExtended = () => {
 
   // フォーム送信
   const handleSubmit = async () => {
-    if (!formData.mood) {
-      Alert.alert('気分の選択は必須です！');
+    if (!formData.baseAlcohol && !formData.flavorProfile && !formData.garnish) {
+      Alert.alert('いずれかの項目を入力してください！');
       return;
     }
     await generateRecipe();
@@ -312,66 +307,40 @@ const RecipeFormExtended = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.innerContainer}>
-          <Text style={styles.title}>🍳 あなたのこだわりレシピを作ろう</Text>
-
+          <Text style={styles.title}>
+            🍸 カクテルのこだわりを選択してください
+          </Text>
           <CustomSelect
-            label="今の気分😃"
-            selectedValue={formData.mood}
-            onValueChange={(value) => handleSelectChange('mood', value)}
-            options={moodOptions}
+            label="ベースのお酒🍹"
+            selectedValue={formData.baseAlcohol}
+            onValueChange={(value) => handleSelectChange('baseAlcohol', value)}
+            options={baseAlcoholOptions}
           />
           <CustomSelect
-            label="調理時間⏰"
-            selectedValue={formData.time}
-            onValueChange={(value) => handleSelectChange('time', value)}
-            options={cookingTimeOptions}
-          />
-          <CustomSelect
-            label="食べる時間帯🍽️"
-            selectedValue={formData.mealTime}
-            onValueChange={(value) => handleSelectChange('mealTime', value)}
-            options={mealTimeOptions}
-          />
-
-          {/* 予算のセレクトボックスを追加 */}
-          <CustomSelect
-            label="予算💰"
-            selectedValue={formData.budget}
-            onValueChange={(value) => handleSelectChange('budget', value)}
-            options={budgetOptions}
-          />
-
-          {/* 人数のセレクトボックスを追加 */}
-          <CustomSelect
-            label="人数👥"
-            selectedValue={formData.people}
-            onValueChange={(value) => handleSelectChange('people', value)}
-            options={peopleOptions}
-          />
-
-          <View style={styles.section}>
-            <Text style={styles.label}>手間🖐️</Text>
-            {effortOptions.map((option: Option) => (
-              <CustomCheckbox
-                key={option.value}
-                value={formData.effort.includes(option.value)}
-                onValueChange={(checked) =>
-                  handleCheckboxChange(option.value, checked)
-                }
-                label={option.label}
-              />
-            ))}
-          </View>
-
-          <Text style={styles.label}>使いたい食材🥕</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="使いたい食材 🥕 (例: 鶏肉, トマト)"
-            value={formData.preferredIngredients}
-            maxLength={20}
-            onChangeText={(value) =>
-              handleInputChange('preferredIngredients', value)
+            label="フレーバープロファイル🌿"
+            selectedValue={formData.flavorProfile}
+            onValueChange={(value) =>
+              handleSelectChange('flavorProfile', value)
             }
+            options={flavorProfileOptions}
+          />
+          <CustomSelect
+            label="使用する果物・ハーブ🍋"
+            selectedValue={formData.garnish}
+            onValueChange={(value) => handleSelectChange('garnish', value)}
+            options={garnishOptions}
+          />
+          <CustomSelect
+            label="仕上げのスタイル🎨"
+            selectedValue={formData.style}
+            onValueChange={(value) => handleSelectChange('style', value)}
+            options={styleOptions}
+          />
+          <CustomSelect
+            label="カクテルの強さ💪"
+            selectedValue={formData.strength}
+            onValueChange={(value) => handleSelectChange('strength', value)}
+            options={strengthOptions}
           />
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             {isGenerating ? (
@@ -382,7 +351,6 @@ const RecipeFormExtended = () => {
               </Text>
             )}
           </TouchableOpacity>
-
           {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
 
@@ -402,4 +370,4 @@ const RecipeFormExtended = () => {
   );
 };
 
-export default RecipeFormExtended;
+export default CocktailForm;

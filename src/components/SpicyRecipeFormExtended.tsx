@@ -1,9 +1,7 @@
-// src/components/RecipeFormExtended.tsx
 import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -13,49 +11,93 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
-import {
-  moodOptions,
-  cookingTimeOptions,
-  effortOptions,
-  mealTimeOptions,
-  budgetOptions,
-  peopleOptions,
-} from '../utils/options';
 import RecipeModal from './RecipeModal'; // 別ファイルからインポート
-import CustomCheckbox from './CustomCheckbox'; // カスタムチェックボックス
 import CustomSelect from './CustomSelect'; // カスタムセレクトボックス
 import supabase from '../config/supabaseClient';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
-// フォームデータの型定義
 type FormData = {
-  mood: string;
-  time: string;
-  mealTime: string;
-  budget: string;
-  effort: string[];
-  preferredIngredients: string;
-  people: string;
-  preference: string;
-};
-
-type Option = {
-  label: string;
-  value: string;
+  spiceLevel: string;
+  spiceType: string;
+  cookingMethod: string;
+  mainIngredient: string;
+  flavorTheme: string;
+  dishTexture: string;
+  finalTouch: string;
 };
 
 const initialFormData: FormData = {
-  mood: '',
-  time: '',
-  mealTime: '',
-  budget: '',
-  effort: [],
-  preferredIngredients: '',
-  people: '',
-  preference: '',
+  spiceLevel: '',
+  spiceType: '',
+  cookingMethod: '',
+  mainIngredient: '',
+  flavorTheme: '',
+  dishTexture: '',
+  finalTouch: '',
 };
 
-const RecipeFormExtended = () => {
+const spiceLevelOptions = [
+  { label: '控えめ', value: '控えめ' },
+  { label: '中辛', value: '中辛' },
+  { label: '大辛', value: '大辛' },
+  { label: '激辛', value: '激辛' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const spiceTypeOptions = [
+  { label: '唐辛子', value: '唐辛子' },
+  { label: '胡椒', value: '胡椒' },
+  { label: 'わさび', value: 'わさび' },
+  { label: 'マスタード', value: 'マスタード' },
+  { label: 'ラー油', value: 'ラー油' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const cookingMethodOptions = [
+  { label: '炒める', value: '炒める' },
+  { label: '煮込む', value: '煮込む' },
+  { label: '焼く', value: '焼く' },
+  { label: '揚げる', value: '揚げる' },
+  { label: '蒸す', value: '蒸す' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const mainIngredientOptions = [
+  { label: '豚肉', value: '豚肉' },
+  { label: '鶏肉', value: '鶏肉' },
+  { label: 'シーフード', value: 'シーフード' },
+  { label: '豆腐', value: '豆腐' },
+  { label: '野菜', value: '野菜' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const flavorThemeOptions = [
+  { label: '和風', value: '和風' },
+  { label: '中華風', value: '中華風' },
+  { label: '韓国風', value: '韓国風' },
+  { label: 'タイ風', value: 'タイ風' },
+  { label: 'メキシカン', value: 'メキシカン' },
+  { label: 'インド風', value: 'インド風' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const dishTextureOptions = [
+  { label: 'サクサク', value: 'サクサク' },
+  { label: 'カリッと', value: 'カリッと' },
+  { label: '柔らかい', value: '柔らかい' },
+  { label: '濃厚', value: '濃厚' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const finalTouchOptions = [
+  { label: 'ご飯に合う', value: 'ご飯に合う' },
+  { label: '麺に合う', value: '麺に合う' },
+  { label: 'おつまみ向け', value: 'おつまみ向け' },
+  { label: 'サラダ仕立て', value: 'サラダ仕立て' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+const SpicyRecipeFormExtended = () => {
   const [generatedRecipe, setGeneratedRecipe] = useState<string>('');
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -128,38 +170,6 @@ const RecipeFormExtended = () => {
     }));
   };
 
-  const MAX_SELECTION = 3;
-  // チェックボックスの変更ハンドラー
-  const handleCheckboxChange = (value: string, checked: boolean) => {
-    setFormData((prev) => {
-      const currentArray = prev.effort;
-
-      // 選択追加時に最大数を確認
-      if (checked && currentArray.length >= MAX_SELECTION) {
-        Alert.alert(
-          '選択制限',
-          `最大${MAX_SELECTION}つまでしか選択できません。`,
-        );
-        return prev; // 制限時は変更しない
-      }
-
-      return {
-        ...prev,
-        effort: checked
-          ? [...currentArray, value] // 選択を追加
-          : currentArray.filter((item) => item !== value), // 選択を解除
-      };
-    });
-  };
-
-  // テキストフィールドの変更ハンドラー
-  const handleInputChange = (name: keyof FormData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
     const pointsToConsume = 2; // レシピ1回あたり消費するポイント
@@ -201,11 +211,11 @@ const RecipeFormExtended = () => {
         return;
       }
 
-      console.log('フォームデータ:', formData);
+      console.log('formData:', formData);
 
       // レシピ生成 API を呼び出す
       const response = await axios.post(
-        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-recipe',
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-spicy-recipe',
         formData,
         {
           headers: {
@@ -246,8 +256,16 @@ const RecipeFormExtended = () => {
 
   // フォーム送信
   const handleSubmit = async () => {
-    if (!formData.mood) {
-      Alert.alert('気分の選択は必須です！');
+    if (
+      !formData.spiceLevel &&
+      !formData.spiceType &&
+      !formData.cookingMethod &&
+      !formData.mainIngredient &&
+      !formData.flavorTheme &&
+      !formData.dishTexture &&
+      !formData.finalTouch
+    ) {
+      Alert.alert('いずれかの項目を選択してください！');
       return;
     }
     await generateRecipe();
@@ -312,66 +330,54 @@ const RecipeFormExtended = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.innerContainer}>
-          <Text style={styles.title}>🍳 あなたのこだわりレシピを作ろう</Text>
-
+          <Text style={styles.title}>
+            🔥 ピリ辛料理のこだわりを選択してください
+          </Text>
           <CustomSelect
-            label="今の気分😃"
-            selectedValue={formData.mood}
-            onValueChange={(value) => handleSelectChange('mood', value)}
-            options={moodOptions}
+            label="❤️‍🔥辛さのレベル"
+            selectedValue={formData.spiceLevel}
+            onValueChange={(value) => handleSelectChange('spiceLevel', value)}
+            options={spiceLevelOptions}
           />
           <CustomSelect
-            label="調理時間⏰"
-            selectedValue={formData.time}
-            onValueChange={(value) => handleSelectChange('time', value)}
-            options={cookingTimeOptions}
+            label="👅辛味の種類"
+            selectedValue={formData.spiceType}
+            onValueChange={(value) => handleSelectChange('spiceType', value)}
+            options={spiceTypeOptions}
           />
           <CustomSelect
-            label="食べる時間帯🍽️"
-            selectedValue={formData.mealTime}
-            onValueChange={(value) => handleSelectChange('mealTime', value)}
-            options={mealTimeOptions}
-          />
-
-          {/* 予算のセレクトボックスを追加 */}
-          <CustomSelect
-            label="予算💰"
-            selectedValue={formData.budget}
-            onValueChange={(value) => handleSelectChange('budget', value)}
-            options={budgetOptions}
-          />
-
-          {/* 人数のセレクトボックスを追加 */}
-          <CustomSelect
-            label="人数👥"
-            selectedValue={formData.people}
-            onValueChange={(value) => handleSelectChange('people', value)}
-            options={peopleOptions}
-          />
-
-          <View style={styles.section}>
-            <Text style={styles.label}>手間🖐️</Text>
-            {effortOptions.map((option: Option) => (
-              <CustomCheckbox
-                key={option.value}
-                value={formData.effort.includes(option.value)}
-                onValueChange={(checked) =>
-                  handleCheckboxChange(option.value, checked)
-                }
-                label={option.label}
-              />
-            ))}
-          </View>
-
-          <Text style={styles.label}>使いたい食材🥕</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="使いたい食材 🥕 (例: 鶏肉, トマト)"
-            value={formData.preferredIngredients}
-            maxLength={20}
-            onChangeText={(value) =>
-              handleInputChange('preferredIngredients', value)
+            label="🫕調理法"
+            selectedValue={formData.cookingMethod}
+            onValueChange={(value) =>
+              handleSelectChange('cookingMethod', value)
             }
+            options={cookingMethodOptions}
+          />
+          <CustomSelect
+            label="🫑メインの食材"
+            selectedValue={formData.mainIngredient}
+            onValueChange={(value) =>
+              handleSelectChange('mainIngredient', value)
+            }
+            options={mainIngredientOptions}
+          />
+          <CustomSelect
+            label="☠️風味のテーマ"
+            selectedValue={formData.flavorTheme}
+            onValueChange={(value) => handleSelectChange('flavorTheme', value)}
+            options={flavorThemeOptions}
+          />
+          <CustomSelect
+            label="🏴‍☠️食感"
+            selectedValue={formData.dishTexture}
+            onValueChange={(value) => handleSelectChange('dishTexture', value)}
+            options={dishTextureOptions}
+          />
+          <CustomSelect
+            label="🔥仕上げ"
+            selectedValue={formData.finalTouch}
+            onValueChange={(value) => handleSelectChange('finalTouch', value)}
+            options={finalTouchOptions}
           />
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             {isGenerating ? (
@@ -382,11 +388,8 @@ const RecipeFormExtended = () => {
               </Text>
             )}
           </TouchableOpacity>
-
           {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
-
-        {/* ストリーミングされたレシピを表示するためのモーダル */}
         {modalOpen && (
           <RecipeModal
             open={modalOpen}
@@ -402,4 +405,4 @@ const RecipeFormExtended = () => {
   );
 };
 
-export default RecipeFormExtended;
+export default SpicyRecipeFormExtended;

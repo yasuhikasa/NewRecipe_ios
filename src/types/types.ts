@@ -10,6 +10,18 @@ export type RootStackParamList = {
   Contact: undefined;
   Dashboard: undefined;
   RecipeCreate: undefined;
+  KidsCreate: undefined;
+  DietCreate: undefined;
+  LunchboxCreate: undefined;
+  BeautyCreate: undefined;
+  SnsCreate: undefined;
+  SweetCreate: undefined;
+  SpicyCreate: undefined;
+  TraditionalJapaneseCreate: undefined;
+  WesternDishCreate: undefined;
+  BistroCreate: undefined;
+  CocktailCreate: undefined;
+  SpecialDayCreate: undefined;
   RecipeList: undefined;
   LabelManagement: undefined;
   Purchase: undefined;
