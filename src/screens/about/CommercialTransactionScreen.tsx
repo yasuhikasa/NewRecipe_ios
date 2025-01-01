@@ -76,35 +76,43 @@ const CommercialTransactionScreen: React.FC = () => {
         <Text style={styles.text}>アプリ内課金100円、200円（税込）</Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.heading}>第6条（支払い時期および方法）</Text>
-        <Text style={styles.text}>1. 支払い方法: クレジットカード決済</Text>
-        <Text style={styles.text}>2. 支払い時期: 購入時に決済</Text>
-      </View>
+      <Text style={styles.heading}>第6条（ポイント課金に関する規定）</Text>
+      <Text style={styles.text}>
+        本サービスでは、AIレシピ生成機能の利用にポイント課金制度を採用しています。
+        {'\n\n'}
+        ポイントはアプリ内課金を通じて購入することができ、購入したポイントを使用してAIによるレシピ生成が可能となります。
+        {'\n\n'}
+        各ポイントパッケージの価格および購入可能数は、アプリ内で表示される内容に従います。
+        {'\n\n'}
+        購入されたポイントは、購入者本人のアカウントにのみ適用され、第三者への譲渡、貸与、または売買はできません。
+      </Text>
 
-      <View style={styles.section}>
-        <Text style={styles.heading}>第7条（商品代金以外に必要な料金）</Text>
-        <Text style={styles.text}>
-          本サービスの利用には、別途インターネット通信料が発生します。
-        </Text>
-      </View>
+      <Text style={styles.heading}>第7条（ポイント管理および利用規約）</Text>
+      <Text style={styles.text}>
+        ユーザーは、購入したポイントを適切に管理し、AIレシピ生成機能にのみ使用するものとします。
+        {'\n\n'}
+        一度消費されたポイントは復元されません。アカウント削除時には未使用のポイントも削除されます。
+        {'\n\n'}
+        未使用のポイントは、有効期限が設定されている場合、その期限内に使用する必要があります。ポイントの有効期限についてはアプリ内で通知されます。
+        {'\n\n'}
+        ポイント購入後のキャンセルおよび返金は、各ストア（App Store または Google
+        Play）のポリシーに従います。
+      </Text>
 
-      <View style={styles.section}>
-        <Text style={styles.heading}>第8条（サービスの提供時期）</Text>
-        <Text style={styles.text}>
-          購入手続き完了後、即時ご利用いただけます。
-        </Text>
-      </View>
+      <Text style={styles.heading}>第8条（返金ポリシー）</Text>
+      <Text style={styles.text}>
+        ポイント購入後の返金は、各ストア（App Store または Google
+        Play）の返金ポリシーに従います。
+        {'\n\n'}
+        運営者は、直接の返金対応を行いません。返金を希望される場合は、各ストアのサポートへお問い合わせください。
+      </Text>
 
-      <View style={styles.section}>
-        <Text style={styles.heading}>第9条（返品およびキャンセル）</Text>
-        <Text style={styles.text}>
-          1. サービスの性質上、返品・キャンセルはお受けできません。
-        </Text>
-        <Text style={styles.text}>
-          2. 購入後のトラブルについては、サポート窓口にお問い合わせください。
-        </Text>
-      </View>
+      <Text style={styles.heading}>第9条（免責事項）</Text>
+      <Text style={styles.text}>
+        本サービスの利用により生じた損害について、運営者は一切の責任を負いません。
+        {'\n\n'}
+        サーバーの障害やメンテナンスなどにより、一時的にポイント利用やAIレシピ生成ができなくなる場合があります。
+      </Text>
 
       <View style={styles.section}>
         <Text style={styles.heading}>第10条（動作環境）</Text>
