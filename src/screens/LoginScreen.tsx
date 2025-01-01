@@ -91,7 +91,7 @@ const LoginScreen: React.FC = () => {
       await saveSession(data.session);
 
       // 8. ログイン後の画面遷移
-      navigation.navigate('Dashboard');
+      navigation.replace('Dashboard');
     } catch (err) {
       console.error('サインインエラー:', err);
       Alert.alert('エラー', 'サインイン中に問題が発生しました');
