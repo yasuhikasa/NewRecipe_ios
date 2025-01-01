@@ -92,42 +92,45 @@ const TermsOfServiceScreen: React.FC = () => {
         ユーザーは、他のユーザーや第三者の権利を尊重し、良識ある行動をとるものとします。不適切なコンテンツの投稿や迷惑行為は厳禁とします。
       </Text>
 
-      <Text style={styles.heading}>
-        第6条（サブスクリプションに関する規定）
-      </Text>
+      <Text style={styles.heading}>第6条（ポイント課金に関する規定）</Text>
       <Text style={styles.text}>
-        本サービスの機能は、サブスクリプションの購入により利用可能となります。
+        本サービスでは、AIレシピ生成機能の利用にポイント課金制度を採用しています。
         {'\n\n'}
-        サブスクリプションの料金、支払い方法、更新については、各ストア（App
-        Store または Google Play）の規定に従います。
+        ポイントはアプリ内課金を通じて購入することができ、購入したポイントを使用してAIによるレシピ生成が可能となります。
         {'\n\n'}
-        サブスクリプションの解約手続きは、各ストアの手順に従ってユーザー自身が行うものとします。
+        各ポイントパッケージの価格および購入可能数は、アプリ内で表示される内容に従います。
+        {'\n\n'}
+        購入されたポイントは、購入者本人のアカウントにのみ適用され、第三者への譲渡、貸与、または売買はできません。
       </Text>
 
-      <Text style={styles.heading}>
-        第7条（サブスクリプション管理およびリファンドポリシー）
-      </Text>
+      <Text style={styles.heading}>第7条（ポイント管理および利用規約）</Text>
       <Text style={styles.text}>
-        ユーザーは、サブスクリプションの管理および解約を各ストアの設定画面から行うものとします。
+        ユーザーは、購入したポイントを適切に管理し、このアプリの機能にのみ使用するものとします。
         {'\n\n'}
-        解約後も、契約期間満了日までは本サービスを利用することができます。
+        一度消費されたポイントは復元されません。アカウント削除後も未使用のポイントは失効します。
         {'\n\n'}
-        返金については、各ストアの返金ポリシーに従い、運営者は直接の返金対応を行いません。
+        未使用のポイントは、有効期限が設定されている場合、その期限内に使用する必要があります。ポイントの有効期限についてはアプリ内で通知されます。
+        {'\n\n'}
+        ポイント購入後のキャンセルおよび返金は、各ストア（App Store または Google
+        Play）のポリシーに従います。
       </Text>
 
-      <Text style={styles.heading}>第8条（免責事項）</Text>
+      <Text style={styles.heading}>第8条（返金ポリシー）</Text>
       <Text style={styles.text}>
-        運営者は、本サービスの利用により生じたユーザーの損害について、一切の責任を負いません。
+        ポイント購入後の返金は、各ストア（App Store または Google
+        Play）の返金ポリシーに従います。
         {'\n\n'}
-        本サービスは現状有姿で提供されるものであり、その正確性、完全性、有用性を保証するものではありません。
-        {'\n\n'}
-        サーバーの障害、メンテナンス、ネットワークトラブルなどによりサービスが一時的に停止する場合があります。
-        {'\n\n'}
-        {/* 免責に関する追加文言 */}
-        運営者は、本サービスの利用または利用不能、もしくは本規約に関する一切の事項において、特別、間接、付随的、派生的損害（逸失利益、事業機会の喪失、データの喪失など）についても、一切の責任を負わないものとします。
+        運営者は、直接の返金対応を行いません。返金を希望される場合は、各ストアのサポートへお問い合わせください。
       </Text>
 
-      <Text style={styles.heading}>第9条（サポートポリシー）</Text>
+      <Text style={styles.heading}>第9条（免責事項）</Text>
+      <Text style={styles.text}>
+        本サービスの利用により生じた損害について、運営者は一切の責任を負いません。
+        {'\n\n'}
+        サーバーの障害やメンテナンスなどにより、一時的にポイント利用やAIレシピ生成ができなくなる場合があります。
+      </Text>
+
+      <Text style={styles.heading}>第10条（サポートポリシー）</Text>
       <Text style={styles.text}>
         運営者は、ユーザーからの問い合わせに対し、可能な限り迅速に対応します。
         {'\n\n'}
@@ -136,12 +139,12 @@ const TermsOfServiceScreen: React.FC = () => {
         お問い合わせは、メール（info@sinamonoinfo.com）またはアプリ内のお問い合わせフォームよりお願いいたします。
       </Text>
 
-      <Text style={styles.heading}>第10条（知的財産権）</Text>
+      <Text style={styles.heading}>第11条（知的財産権）</Text>
       <Text style={styles.text}>
         本サービスに関する著作権、商標権、特許権、その他の知的財産権は、運営者または正当な権利を有する第三者に帰属します。ユーザーは、運営者の事前の承諾なく、これらの権利を侵害する行為をしてはなりません。
       </Text>
 
-      <Text style={styles.heading}>第11条（アプリ更新に関するポリシー）</Text>
+      <Text style={styles.heading}>第12条（アプリ更新に関するポリシー）</Text>
       <Text style={styles.text}>
         運営者は、ユーザーに通知することなく、本サービスの内容を変更、追加、削除することがあります。
         {'\n\n'}
@@ -150,7 +153,7 @@ const TermsOfServiceScreen: React.FC = () => {
         ユーザーは、常に最新のバージョンを利用するよう努めるものとします。
       </Text>
 
-      <Text style={styles.heading}>第12条（広告ポリシー）</Text>
+      <Text style={styles.heading}>第13条（広告ポリシー）</Text>
       <Text style={styles.text}>
         本サービスでは、第三者の広告が表示される場合があります。
         {'\n\n'}
@@ -159,21 +162,21 @@ const TermsOfServiceScreen: React.FC = () => {
         ユーザーは、広告の閲覧や利用により生じた損害について、運営者が責任を負わないことを了承します。
       </Text>
 
-      <Text style={styles.heading}>第13条（クッキーポリシー）</Text>
+      <Text style={styles.heading}>第14条（クッキーポリシー）</Text>
       <Text style={styles.text}>
         本サービスは、ユーザーの利便性向上やサービス改善のためにクッキーを使用する場合があります。
         {'\n\n'}
         ユーザーは、ブラウザの設定によりクッキーの使用を拒否することができますが、その場合、本サービスの一部機能が利用できなくなる可能性があります。
       </Text>
 
-      <Text style={styles.heading}>第14条（特別規約や地域別規約）</Text>
+      <Text style={styles.heading}>第15条（特別規約や地域別規約）</Text>
       <Text style={styles.text}>
         ユーザーが日本国外から本サービスを利用する場合、その国または地域の法令を遵守するものとします。
         {'\n\n'}
         特定の地域で追加の規約が適用される場合、ユーザーはそれらに従うものとします。
       </Text>
 
-      <Text style={styles.heading}>第15条（リファンドポリシー）</Text>
+      <Text style={styles.heading}>第16条（リファンドポリシー）</Text>
       <Text style={styles.text}>
         サブスクリプションの返金は、各ストア（App Store または Google
         Play）の返金ポリシーに従います。
@@ -181,20 +184,20 @@ const TermsOfServiceScreen: React.FC = () => {
         運営者は、直接の返金対応を行いませんので、返金を希望される場合は各ストアにお問い合わせください。
       </Text>
 
-      <Text style={styles.heading}>第16条（準拠法および裁判管轄）</Text>
+      <Text style={styles.heading}>第17条（準拠法および裁判管轄）</Text>
       <Text style={styles.text}>
         本規約の解釈および適用に関しては、日本法を準拠法とします。
         {'\n\n'}
         本サービスに関連して紛争が生じた場合、運営者の所在地を管轄する日本の裁判所を専属的合意管轄とします。
       </Text>
 
-      <Text style={styles.heading}>第17条（改定）</Text>
+      <Text style={styles.heading}>第18条（改定）</Text>
       <Text style={styles.text}>
         運営者は、本規約を必要に応じて改定することができます。改定後の規約は、本サービス上に掲載した時点から効力を生じるものとします。
       </Text>
 
       <Text style={styles.heading}>附則</Text>
-      <Text style={styles.text}>本規約は2024年12月1日より施行します。</Text>
+      <Text style={styles.text}>本規約は2025年1月1日より施行します。</Text>
     </ScrollView>
   );
 };
