@@ -227,6 +227,7 @@ const RecipeLabelModal: React.FC<RecipeLabelModalProps> = ({
                 value={recipeName}
                 onChangeText={setRecipeName}
                 placeholder="レシピ名を入力"
+                maxLength={30}
               />
               <ScrollView>
                 {labels.map((label) => {
