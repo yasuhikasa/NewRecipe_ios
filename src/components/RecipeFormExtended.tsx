@@ -313,7 +313,7 @@ const RecipeFormExtended = () => {
       >
         <View style={styles.innerContainer}>
           <Text style={styles.title}>🍳 あなたのこだわりレシピを作ろう</Text>
-
+          <Text style={styles.label}>気分の項目の入力が必須です</Text>
           <CustomSelect
             label="今の気分😃"
             selectedValue={formData.mood}

@@ -326,6 +326,7 @@ const SweetRecipeFormExtended = () => {
           <Text style={styles.title}>
             🍰 スイーツのこだわり項目を選択してください
           </Text>
+          <Text style={styles.label}>いずれかの項目の入力が必要です</Text>
           <CustomSelect
             label="スイーツの種類🍓"
             selectedValue={formData.sweetType}

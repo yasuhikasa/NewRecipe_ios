@@ -328,6 +328,7 @@ const BistroDishForm = () => {
           <Text style={styles.title}>
             🍷 ビストロ風料理のこだわりを選択してください
           </Text>
+          <Text style={styles.label}>いずれかの項目の入力が必要です</Text>
           <CustomSelect
             label="ソースの種類🍛"
             selectedValue={formData.sauce}

@@ -323,6 +323,7 @@ const SpecialDayForm = () => {
           <Text style={styles.title}>
             🎉 特別な日のこだわりを選択してください
           </Text>
+          <Text style={styles.label}>いずれかの項目の入力が必要です</Text>
           <CustomSelect
             label="イベントの種類🌟"
             selectedValue={formData.event}

@@ -365,6 +365,7 @@ const LunchboxFormExtended = () => {
           <Text style={styles.title}>
             🍳 子供が喜ぶレシピのこだわりを選択してください
           </Text>
+          <Text style={styles.label}>いずれかの項目の入力が必要です</Text>
           <Text style={styles.label}>子供が喜ぶポイント</Text>
           {kidsPreferences.map((option) => (
             <CustomCheckbox

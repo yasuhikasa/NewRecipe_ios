@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Alert,
   StyleSheet,
   useWindowDimensions,
   Text,
+  TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppleAuthentication from '@invertase/react-native-apple-authentication';
@@ -12,6 +13,7 @@ import supabase from '../config/supabaseClient';
 import { RootStackParamList } from '../types/types';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import RecipeSampleModal from '../components/RecipeSampleModal';
 import AppleAuth from '@invertase/react-native-apple-authentication';
 import { AppleButton } from '@invertase/react-native-apple-authentication';
 
@@ -26,6 +28,7 @@ type LoginScreenNavigationProp = StackNavigationProp<
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const [isModalVisible, setModalVisible] = useState(false);
   const { width } = useWindowDimensions(); // 画面の幅を取得
 
   // iPadや大きな画面用にボタンのサイズを調整
@@ -174,6 +177,13 @@ const LoginScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.description}>
+        本アプリでは、ポイント課金制でAIによる様々なこだわりによるレシピ作成を提供しています。
+        {'\n'}
+        ポイントを適切に管理し、安全にサービスを利用していただくため、アカウント登録が必要です。
+        {'\n\n'}
+        アプリの機能については「このアプリの使い方について」をご覧ください。
+      </Text>
       <Text style={styles.announcementText}>⭐️サインインはこちらから</Text>
       <View style={styles.appleButtonContainer}>
         <AppleButton
@@ -183,12 +193,19 @@ const LoginScreen: React.FC = () => {
           onPress={handleAppleSignIn}
         />
       </View>
-      <Text
-        style={styles.switchText}
-        onPress={() => navigation.navigate('HowToUse')}
-      >
-        このアプリの使い方について
+      <Text style={styles.announcementText2}>
+        ⭐️このアプリの使い方はこちらから
       </Text>
+      <TouchableOpacity onPress={() => navigation.navigate('HowToUse')}>
+        <Text style={styles.switchText}>このアプリの使い方（How to use）</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => setModalVisible(true)}>
+        <Text style={styles.switchText}>作成されたサンプルレシピを見る</Text>
+      </TouchableOpacity>
+      <RecipeSampleModal
+        visible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+      />
     </View>
   );
 };
@@ -201,11 +218,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF8E1',
     paddingTop: 60,
   },
+  description: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
   announcementText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 20,
+  },
+  announcementText2: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 30,
+    marginBottom: 10,
   },
   appleButtonContainer: {
     borderWidth: 1,
@@ -220,7 +251,7 @@ const styles = StyleSheet.create({
   switchText: {
     textAlign: 'center',
     color: 'blue',
-    marginTop: 50,
+    marginTop: 20,
     fontSize: 20,
   },
 });

@@ -191,7 +191,7 @@ const RecipeListScreen: React.FC = () => {
       </View>
       <View>
         <Text style={styles.operationGuide}>
-          レシピを長押しするとレシピ名の編集とラベル分けができます。
+          レシピをタップするとレシピの詳細を表示できます。レシピを長押しするとレシピ名の編集とラベル分けができます。
         </Text>
       </View>
       {/* レシピセクション */}

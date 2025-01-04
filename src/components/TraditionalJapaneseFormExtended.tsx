@@ -322,6 +322,7 @@ const TraditionalJapaneseForm = () => {
           <Text style={styles.title}>
             🍶 和食レシピのこだわりを選んでください
           </Text>
+          <Text style={styles.label}>いずれかの項目の入力が必要です</Text>
           <CustomSelect
             label="季節（提案する食材の季節）🌸"
             selectedValue={formData.season}

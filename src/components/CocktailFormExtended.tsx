@@ -310,6 +310,7 @@ const CocktailForm = () => {
           <Text style={styles.title}>
             🍸 カクテルのこだわりを選択してください
           </Text>
+          <Text style={styles.label}>いずれかの項目の入力が必要です</Text>
           <CustomSelect
             label="ベースのお酒🍹"
             selectedValue={formData.baseAlcohol}

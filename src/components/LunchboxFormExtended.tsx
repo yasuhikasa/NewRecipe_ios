@@ -383,6 +383,7 @@ const LunchboxFormExtended = () => {
           <Text style={styles.title}>
             🍳 あなたのこだわりお弁当レシピを作ろう
           </Text>
+          <Text style={styles.label}>いずれかの項目の入力が必要です</Text>
           <Text style={styles.label}>お弁当のこだわり</Text>
           {bentoPreferences.map((option) => (
             <CustomCheckbox

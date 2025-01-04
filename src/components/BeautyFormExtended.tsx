@@ -385,7 +385,7 @@ const BeautyRecipeFormExtended = () => {
           <Text style={styles.title}>
             🍓 美容・アンチエイジングのこだわりポイントを選択してください
           </Text>
-
+          <Text style={styles.label}>いずれかの項目の入力が必要です</Text>
           {/* 美容のこだわりポイント */}
           <Text style={styles.label}>美容のこだわりポイント💄</Text>
           {beautyPreferences.map((option) => (

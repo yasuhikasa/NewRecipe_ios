@@ -321,6 +321,7 @@ const WesternDishForm = () => {
           <Text style={styles.title}>
             🍽 洋食レシピのこだわりを選択してください
           </Text>
+          <Text style={styles.label}>いずれかの項目の入力が必要です</Text>
           <CustomSelect
             label="ソースの種類🍛"
             selectedValue={formData.sauce}

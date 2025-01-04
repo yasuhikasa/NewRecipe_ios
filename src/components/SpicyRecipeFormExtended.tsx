@@ -333,6 +333,7 @@ const SpicyRecipeFormExtended = () => {
           <Text style={styles.title}>
             🔥 ピリ辛料理のこだわりを選択してください
           </Text>
+          <Text style={styles.label}>いずれかの項目の入力が必要です</Text>
           <CustomSelect
             label="❤️‍🔥辛さのレベル"
             selectedValue={formData.spiceLevel}

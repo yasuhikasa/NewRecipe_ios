@@ -111,8 +111,8 @@ const TermsOfServiceScreen: React.FC = () => {
         {'\n\n'}
         未使用のポイントは、有効期限が設定されている場合、その期限内に使用する必要があります。ポイントの有効期限についてはアプリ内で通知されます。
         {'\n\n'}
-        ポイント購入後のキャンセルおよび返金は、各ストア（App Store または Google
-        Play）のポリシーに従います。
+        ポイント購入後のキャンセルおよび返金は、各ストア（App Store または
+        Google Play）のポリシーに従います。
       </Text>
 
       <Text style={styles.heading}>第8条（返金ポリシー）</Text>

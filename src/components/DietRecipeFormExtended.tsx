@@ -375,6 +375,7 @@ const DietRecipeFormExtended = () => {
           <Text style={styles.title}>
             🍳 ダイエットレシピのこだわりを選択してください
           </Text>
+          <Text style={styles.label}>いずれかの項目の入力が必要です</Text>
           <Text style={styles.label}>ダイエットのこだわりポイント💪</Text>
           {dietPreferences.map((option) => (
             <CustomCheckbox
