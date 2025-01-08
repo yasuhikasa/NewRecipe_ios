@@ -74,6 +74,25 @@ const RecipeSampleModal: React.FC<RecipeSampleModalProps> = ({
       color: '#ff6347',
       marginBottom: isLargeScreen ? 16 : 12,
     },
+    heading2: {
+      fontSize: isLargeScreen ? 22 : 20,
+      fontWeight: 'bold',
+      color: '#ffa07a',
+      marginBottom: isLargeScreen ? 14 : 10,
+    },
+    heading3: {
+      fontSize: isLargeScreen ? 20 : 18,
+      fontWeight: 'bold',
+      color: '#f08080',
+      marginBottom: isLargeScreen ? 12 : 8,
+    },
+    heading4: {
+      fontSize: isLargeScreen ? 18 : 16,
+      fontWeight: 'bold',
+      marginBottom: 6,
+      marginTop: 6,
+      color: '#cd5c5c',
+    },
     listItem: {
       fontSize: isLargeScreen ? 18 : 16,
       marginBottom: isLargeScreen ? 10 : 8,

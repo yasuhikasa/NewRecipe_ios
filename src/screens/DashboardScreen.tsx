@@ -417,6 +417,13 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.createButton}
+        onPress={() => navigation.navigate('LeftoverCreate')}
+      >
+        <Text style={styles.buttonText}>冷蔵庫の余り物で工夫レシピ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
         onPress={() => navigation.navigate('KidsCreate')}
       >
         <Text style={styles.buttonText}>こだわりの子供向けレシピ</Text>
@@ -462,6 +469,13 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         onPress={() => navigation.navigate('SpecialDayCreate')}
       >
         <Text style={styles.buttonText}>こだわりの特別な日レシピ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate('FusionRecipeCreate')}
+      >
+        <Text style={styles.buttonText}>こだわりの異文化ミックスレシピ</Text>
       </TouchableOpacity>
 
       <TouchableOpacity

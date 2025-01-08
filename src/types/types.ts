@@ -26,6 +26,10 @@ export type RootStackParamList = {
   LabelManagement: undefined;
   Purchase: undefined;
   HowToUse: undefined;
+  FusionRecipeCreate: undefined;
+  Free1RecipeCreate: undefined;
+  Free2RecipeCreate: undefined;
+  LeftoverCreate: undefined;
 };
 
 export type Recipe = {

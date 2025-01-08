@@ -92,3 +92,19 @@ export const preferenceOptions: Option[] = [
   { label: '炭水化物メイン', value: '炭水化物メイン' },
   { label: 'おまかせ', value: 'おまかせ' },
 ];
+export const mealStyleOptions: Option[] = [
+  { label: '家庭料理', value: '家庭料理' },
+  { label: 'デザート', value: 'デザート' },
+  { label: '軽食', value: '軽食' },
+  { label: 'お弁当向け', value: 'お弁当向け' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];
+
+export const ingredientCategoryOptions: Option[] = [
+  { label: '野菜中心', value: '野菜中心' },
+  { label: '肉中心', value: '肉中心' },
+  { label: '魚中心', value: '魚中心' },
+  { label: '炭水化物メイン', value: '炭水化物メイン' },
+  { label: 'ビーガン', value: 'ビーガン' },
+  { label: 'おまかせ', value: 'おまかせ' },
+];

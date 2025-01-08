@@ -25,7 +25,10 @@ const RecipeListScreen: React.FC = () => {
   const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
   const [editRecipeName, setEditRecipeName] = useState<string>('');
   const [editRecipeLabels, setEditRecipeLabels] = useState<string[]>([]);
+  const [loadingNextPage, setLoadingNextPage] = useState<boolean>(false); // 次のページ読み込み中状態
   const { isLandscape, isLargeScreen } = useDeviceOrientation();
+  const [currentPage, setCurrentPage] = useState<number>(0); // 現在のページ
+  const [hasMore, setHasMore] = useState<boolean>(true); // 次のページがあるかどうか
 
   const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
 
@@ -96,25 +99,60 @@ const RecipeListScreen: React.FC = () => {
       marginTop: 10,
       marginBottom: 10,
     },
+    nextButton: {
+      backgroundColor: '#ff6347',
+      padding: isLargeScreen ? 16 : 12,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginTop: isLargeScreen ? 20 : 16,
+      marginBottom: isLargeScreen ? 50 : 30,
+    },
+    nextButtonText: {
+      color: '#fff',
+      fontSize: isLargeScreen ? 18 : 16,
+      fontWeight: 'bold',
+    },
   });
 
   const loadData = useCallback(
-    async (labelId?: string | null, isRefreshing = false) => {
-      if (!isRefreshing) setLoading(true);
+    async (
+      labelId?: string | null,
+      isRefreshing: boolean = false,
+      page: number = 0, // 明示的に number 型を指定
+    ) => {
+      if (!isRefreshing && page === 0) setLoading(true);
+      if (!isRefreshing && page > 0) setLoadingNextPage(true);
       try {
         const user = await getUser();
-        const { labels = [], recipes = [] } = await fetchRecipesWithLabels(
+        const limit = 20; // 1ページあたりの件数
+        const offset = page * limit;
+        const { labels, recipes: newRecipes } = await fetchRecipesWithLabels(
           user.id,
           labelId || undefined,
+          limit,
+          offset,
         );
+
+        if (isRefreshing) {
+          setRecipes(newRecipes); // リフレッシュ時はデータをリセット
+        } else {
+          setRecipes((prev) =>
+            page === 0 ? newRecipes : [...prev, ...newRecipes],
+          );
+        }
+
         setLabels(labels);
-        setRecipes(recipes);
+
+        // 次のページがあるか確認
+        setHasMore(newRecipes.length === limit);
       } catch (error: any) {
         console.error('Error fetching data:', error.message);
         Alert.alert('エラー', 'データの取得に失敗しました');
       } finally {
         if (isRefreshing) setRefreshing(false);
         else setLoading(false);
+
+        if (page > 0) setLoadingNextPage(false);
       }
     },
     [],
@@ -239,6 +277,26 @@ const RecipeListScreen: React.FC = () => {
         }}
         onClose={() => setEditModalVisible(false)}
       />
+      {/* 次へボタン */}
+      <TouchableOpacity
+        style={styles.nextButton}
+        disabled={!hasMore || loadingNextPage} // 次のページ読み込み中は無効化
+        onPress={() => {
+          const nextPage = currentPage + 1; // 次のページを計算
+          setCurrentPage(nextPage); // 現在のページを更新
+          loadData(selectedLabelId, false, nextPage); // isRefreshing を false、page を nextPage に設定
+        }}
+      >
+        {loadingNextPage ? ( // ローディング状態に応じて切り替え
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.nextButtonText}>
+            {hasMore
+              ? 'さらにレシピを読み込む'
+              : 'これ以上のデータはありません'}
+          </Text>
+        )}
+      </TouchableOpacity>
     </ScrollView>
   );
 };

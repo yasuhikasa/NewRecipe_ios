@@ -3,9 +3,9 @@ import {
   View,
   Alert,
   StyleSheet,
-  useWindowDimensions,
   Text,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppleAuthentication from '@invertase/react-native-apple-authentication';
@@ -16,7 +16,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import RecipeSampleModal from '../components/RecipeSampleModal';
 import AppleAuth from '@invertase/react-native-apple-authentication';
 import { AppleButton } from '@invertase/react-native-apple-authentication';
-
+import useDeviceOrientation from '../hooks/useDeviceOrientation';
 import uuid from 'react-native-uuid';
 
 console.log('AppleAuth isSupported:', AppleAuth.isSupported);
@@ -29,10 +29,72 @@ type LoginScreenNavigationProp = StackNavigationProp<
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const [isModalVisible, setModalVisible] = useState(false);
-  const { width } = useWindowDimensions(); // 画面の幅を取得
+  const { isLandscape, isLargeScreen } = useDeviceOrientation();
 
-  // iPadや大きな画面用にボタンのサイズを調整
-  const appleButtonWidth = width > 600 ? 320 : 200;
+  const styles = StyleSheet.create({
+    scrollContainer: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    container: {
+      flex: 1,
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      backgroundColor: '#FFF8E1',
+      paddingVertical: isLargeScreen ? (isLandscape ? 80 : 60) : 40,
+      paddingHorizontal: isLargeScreen ? 40 : 20,
+    },
+    description: {
+      fontSize: isLargeScreen ? 20 : 16,
+      color: '#333',
+      textAlign: 'center',
+      marginBottom: isLargeScreen ? 30 : 20,
+    },
+    announcementText: {
+      fontSize: isLargeScreen ? 22 : 18,
+      fontWeight: 'bold',
+      color: '#333',
+      marginBottom: isLargeScreen ? 30 : 20,
+    },
+    announcementText2: {
+      fontSize: isLargeScreen ? 22 : 18,
+      fontWeight: 'bold',
+      color: '#333',
+      marginTop: 30,
+      marginBottom: isLargeScreen ? 30 : 20,
+    },
+    appleButtonContainer: {
+      marginVertical: isLargeScreen ? 30 : 20,
+    },
+    appleButton: {
+      width: isLargeScreen ? 300 : 200,
+      height: isLargeScreen ? 60 : 44,
+      borderRadius: 5,
+      borderWidth: 1,
+      borderColor: '#000',
+    },
+    switchText: {
+      textAlign: 'center',
+      color: 'blue',
+      marginVertical: isLargeScreen ? 15 : 10,
+      fontSize: isLargeScreen ? 22 : 18,
+    },
+    recipeButton: {
+      backgroundColor: '#ff6347',
+      padding: isLargeScreen ? 20 : 14,
+      borderRadius: 8,
+      marginVertical: isLargeScreen ? 20 : 10,
+      width: '80%',
+      alignItems: 'center',
+      marginBottom: isLargeScreen ? 30 : 20,
+    },
+    recipeButtonText: {
+      color: '#fff',
+      fontSize: isLargeScreen ? 18 : 16,
+      fontWeight: 'bold',
+    },
+  });
 
   const handleAppleSignIn = async () => {
     try {
@@ -129,7 +191,7 @@ const LoginScreen: React.FC = () => {
       console.log('ポイントを新規作成します:', userId);
       const { error: insertError } = await supabase.from('points').insert({
         user_id: userId,
-        total_points: 10,
+        total_points: 15,
       });
 
       if (insertError) {
@@ -176,84 +238,71 @@ const LoginScreen: React.FC = () => {
   }, [restoreSession]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.description}>
-        本アプリでは、ポイント課金制でAIによる様々なこだわりによるレシピ作成を提供しています。
-        {'\n'}
-        ポイントを適切に管理し、安全にサービスを利用していただくため、アカウント登録が必要です。
-        {'\n\n'}
-        アプリの機能については「このアプリの使い方について」をご覧ください。
-      </Text>
-      <Text style={styles.announcementText}>⭐️サインインはこちらから</Text>
-      <View style={styles.appleButtonContainer}>
-        <AppleButton
-          style={[styles.appleButton, { width: appleButtonWidth }]}
-          buttonType={AppleButton.Type.SIGN_IN}
-          buttonStyle={AppleButton.Style.WHITE}
-          onPress={handleAppleSignIn}
+    <ScrollView
+      contentContainerStyle={styles.scrollContainer}
+      keyboardShouldPersistTaps="handled"
+    >
+      <View style={styles.container}>
+        <Text style={styles.description}>
+          本アプリでは、ポイント課金制でAIによる様々なこだわりによるレシピ作成を提供しています。
+          {'\n'}
+          ポイントを適切に管理し、安全にサービスを利用していただくため、アカウント登録が必要です。
+        </Text>
+        <Text style={styles.announcementText}>⭐️サインインはこちらから</Text>
+        <View style={styles.appleButtonContainer}>
+          <AppleButton
+            style={styles.appleButton}
+            buttonType={AppleButton.Type.SIGN_IN}
+            buttonStyle={AppleButton.Style.WHITE}
+            onPress={handleAppleSignIn}
+          />
+        </View>
+        <Text style={styles.announcementText2}>
+          ⭐️このアプリの使い方はこちらから
+        </Text>
+        <TouchableOpacity onPress={() => navigation.navigate('HowToUse')}>
+          <Text style={styles.switchText}>
+            このアプリの使い方（How to use）
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Text style={styles.switchText}>作成されたサンプルレシピを見る</Text>
+        </TouchableOpacity>
+        <Text style={styles.announcementText2}>
+          ⭐️無料のお試し版でレシピを作成してみる
+        </Text>
+        {/* Free1RecipeCreate への遷移ボタン */}
+        <Text style={styles.description}>
+          🍳 お試しレシピ1: 冷蔵庫の余り物でこだわりレシピを作る
+        </Text>
+        <TouchableOpacity
+          style={styles.recipeButton}
+          onPress={() => navigation.navigate('Free1RecipeCreate')}
+        >
+          <Text style={styles.recipeButtonText}>
+            冷蔵庫レシピを作成（約10秒） 🚀
+          </Text>
+        </TouchableOpacity>
+
+        {/* Free2RecipeCreate への遷移ボタン */}
+        <Text style={styles.description}>
+          🍴 お試しレシピ2: 今の気分や食材でレシピを作成する
+        </Text>
+        <TouchableOpacity
+          style={styles.recipeButton}
+          onPress={() => navigation.navigate('Free2RecipeCreate')}
+        >
+          <Text style={styles.recipeButtonText}>
+            気分で選ぶレシピを作成 （約10秒）🌟
+          </Text>
+        </TouchableOpacity>
+        <RecipeSampleModal
+          visible={isModalVisible}
+          onClose={() => setModalVisible(false)}
         />
       </View>
-      <Text style={styles.announcementText2}>
-        ⭐️このアプリの使い方はこちらから
-      </Text>
-      <TouchableOpacity onPress={() => navigation.navigate('HowToUse')}>
-        <Text style={styles.switchText}>このアプリの使い方（How to use）</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <Text style={styles.switchText}>作成されたサンプルレシピを見る</Text>
-      </TouchableOpacity>
-      <RecipeSampleModal
-        visible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-      />
-    </View>
+    </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    backgroundColor: '#FFF8E1',
-    paddingTop: 60,
-  },
-  description: {
-    fontSize: 16,
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 20,
-  },
-  announcementText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
-  },
-  announcementText2: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 30,
-    marginBottom: 10,
-  },
-  appleButtonContainer: {
-    borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 5,
-  },
-  appleButton: {
-    width: 200,
-    height: 44,
-    borderRadius: 5,
-  },
-  switchText: {
-    textAlign: 'center',
-    color: 'blue',
-    marginTop: 20,
-    fontSize: 20,
-  },
-});
 
 export default LoginScreen;

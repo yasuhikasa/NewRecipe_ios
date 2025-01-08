@@ -35,12 +35,13 @@ const initialFormData: FormData = {
 };
 
 const sweetTypeOptions = [
-  { label: 'ミニケーキ', value: 'ミニケーキ' },
+  { label: 'ケーキ', value: 'ケーキ' },
   { label: 'マカロン', value: 'マカロン' },
   { label: 'カップケーキ', value: 'カップケーキ' },
   { label: 'パフェ', value: 'パフェ' },
   { label: 'クッキー', value: 'クッキー' },
   { label: '和風スイーツ', value: '和風スイーツ' },
+  { label: '洋風スイーツ', value: '洋風スイーツ' },
   { label: 'おまかせ', value: 'おまかせ' },
 ];
 
@@ -166,7 +167,7 @@ const SweetRecipeFormExtended = () => {
 
   // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
-    const pointsToConsume = 2; // レシピ1回あたり消費するポイント
+    const pointsToConsume = 3; // レシピ1回あたり消費するポイント
     // let pointsConsumed = false; // ポイント消費フラグ
 
     try {

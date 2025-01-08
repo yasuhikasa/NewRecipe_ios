@@ -18,8 +18,8 @@ import {
   cookingTimeOptions,
   effortOptions,
   mealTimeOptions,
-  budgetOptions,
-  peopleOptions,
+  mealStyleOptions,
+  ingredientCategoryOptions,
 } from '../utils/options';
 import RecipeModal from './RecipeModal'; // 別ファイルからインポート
 import CustomCheckbox from './CustomCheckbox'; // カスタムチェックボックス
@@ -32,10 +32,10 @@ type FormData = {
   mood: string;
   time: string;
   mealTime: string;
-  budget: string;
+  mealStyle: string;
+  ingredientCategory: string;
   effort: string[];
   preferredIngredients: string;
-  people: string;
   preference: string;
 };
 
@@ -48,10 +48,10 @@ const initialFormData: FormData = {
   mood: '',
   time: '',
   mealTime: '',
-  budget: '',
+  mealStyle: '',
+  ingredientCategory: '',
   effort: [],
   preferredIngredients: '',
-  people: '',
   preference: '',
 };
 
@@ -162,7 +162,7 @@ const RecipeFormExtended = () => {
 
   // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
-    const pointsToConsume = 2; // レシピ1回あたり消費するポイント
+    const pointsToConsume = 3; // レシピ1回あたり消費するポイント
     // let pointsConsumed = false; // ポイント消費フラグ
 
     try {
@@ -335,18 +335,18 @@ const RecipeFormExtended = () => {
 
           {/* 予算のセレクトボックスを追加 */}
           <CustomSelect
-            label="予算💰"
-            selectedValue={formData.budget}
-            onValueChange={(value) => handleSelectChange('budget', value)}
-            options={budgetOptions}
+            label="食事のスタイル🍴"
+            selectedValue={formData.mealStyle}
+            onValueChange={(value) => handleInputChange('mealStyle', value)}
+            options={mealStyleOptions}
           />
-
-          {/* 人数のセレクトボックスを追加 */}
           <CustomSelect
-            label="人数👥"
-            selectedValue={formData.people}
-            onValueChange={(value) => handleSelectChange('people', value)}
-            options={peopleOptions}
+            label="食材カテゴリー🥦"
+            selectedValue={formData.ingredientCategory}
+            onValueChange={(value) =>
+              handleInputChange('ingredientCategory', value)
+            }
+            options={ingredientCategoryOptions}
           />
 
           <View style={styles.section}>

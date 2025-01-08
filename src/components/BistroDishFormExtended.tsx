@@ -20,8 +20,8 @@ import useDeviceOrientation from '../hooks/useDeviceOrientation';
 type FormData = {
   sauce: string;
   cookingStyle: string;
-  garnish: string;
-  winePairing: string;
+  difficulty: string;
+  flavorTheme: string;
   platingStyle: string;
   preferredIngredients: string;
 };
@@ -29,8 +29,8 @@ type FormData = {
 const initialFormData: FormData = {
   sauce: '',
   cookingStyle: '',
-  garnish: '',
-  winePairing: '',
+  difficulty: '',
+  flavorTheme: '',
   platingStyle: '',
   preferredIngredients: '',
 };
@@ -53,24 +53,18 @@ const cookingStyleOptions = [
   { label: 'おまかせ', value: 'おまかせ' },
 ];
 
-const garnishOptions = [
-  { label: 'ポテトグラタン', value: 'ポテトグラタン' },
-  { label: 'サラダニソワーズ', value: 'サラダニソワーズ' },
-  { label: 'グリル野菜', value: 'グリル野菜' },
-  { label: 'ハーブを使った添え物', value: 'ハーブを使った添え物' },
-  {
-    label: 'トリュフ風味のマッシュポテト',
-    value: 'トリュフ風味のマッシュポテト',
-  },
+const difficultyOptions = [
+  { label: '簡単', value: '簡単' },
+  { label: '中級', value: '中級' },
+  { label: '上級', value: '上級' },
   { label: 'おまかせ', value: 'おまかせ' },
 ];
 
-const winePairingOptions = [
-  { label: '赤ワイン', value: '赤ワイン' },
-  { label: '白ワイン', value: '白ワイン' },
-  { label: 'ロゼワイン', value: 'ロゼワイン' },
-  { label: 'シャンパン', value: 'シャンパン' },
-  { label: 'ノンアルコール', value: 'ノンアルコール' },
+const flavorThemeOptions = [
+  { label: 'スパイシー', value: 'スパイシー' },
+  { label: 'マイルド', value: 'マイルド' },
+  { label: '酸味が強い', value: '酸味が強い' },
+  { label: 'クリーミー', value: 'クリーミー' },
   { label: 'おまかせ', value: 'おまかせ' },
 ];
 
@@ -168,7 +162,7 @@ const BistroDishForm = () => {
 
   // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
-    const pointsToConsume = 2; // レシピ1回あたり消費するポイント
+    const pointsToConsume = 3; // レシピ1回あたり消費するポイント
     // let pointsConsumed = false; // ポイント消費フラグ
 
     try {
@@ -255,8 +249,8 @@ const BistroDishForm = () => {
     if (
       !formData.sauce &&
       !formData.cookingStyle &&
-      !formData.garnish &&
-      !formData.winePairing &&
+      !formData.difficulty &&
+      !formData.flavorTheme &&
       !formData.platingStyle &&
       !formData.preferredIngredients
     ) {
@@ -342,17 +336,18 @@ const BistroDishForm = () => {
             options={cookingStyleOptions}
           />
           <CustomSelect
-            label="付け合わせ🥗"
-            selectedValue={formData.garnish}
-            onValueChange={(value) => handleSelectChange('garnish', value)}
-            options={garnishOptions}
+            label="調理の難易度⚙️"
+            selectedValue={formData.difficulty}
+            onValueChange={(value) => handleSelectChange('difficulty', value)}
+            options={difficultyOptions}
           />
           <CustomSelect
-            label="ワインペアリング🍷"
-            selectedValue={formData.winePairing}
-            onValueChange={(value) => handleSelectChange('winePairing', value)}
-            options={winePairingOptions}
+            label="風味のテーマ🎨"
+            selectedValue={formData.flavorTheme}
+            onValueChange={(value) => handleSelectChange('flavorTheme', value)}
+            options={flavorThemeOptions}
           />
+
           <CustomSelect
             label="盛り付けスタイル🎨"
             selectedValue={formData.platingStyle}

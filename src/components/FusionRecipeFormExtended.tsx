@@ -4,88 +4,76 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ScrollView,
   Keyboard,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  Alert,
   TextInput,
 } from 'react-native';
 import axios from 'axios';
-import RecipeModal from './RecipeModal'; // 別ファイルからインポート
-import CustomSelect from './CustomSelect'; // カスタムセレクトボックス
+import CustomSelect from './CustomSelect';
+import RecipeModal from './RecipeModal';
 import supabase from '../config/supabaseClient';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
 type FormData = {
-  season: string;
-  dashi: string;
-  seasoning: string;
+  baseCuisine: string;
+  fusionElement: string;
+  flavorProfile: string;
   cookingMethod: string;
-  platingStyle: string;
   preferredIngredients: string;
 };
 
 const initialFormData: FormData = {
-  season: '',
-  dashi: '',
-  seasoning: '',
+  baseCuisine: '',
+  fusionElement: '',
+  flavorProfile: '',
   cookingMethod: '',
-  platingStyle: '',
   preferredIngredients: '',
 };
 
-const seasonOptions = [
-  { label: '春', value: '春' },
-  { label: '夏', value: '夏' },
-  { label: '秋', value: '秋' },
-  { label: '冬', value: '冬' },
+const cuisineOptions = [
+  { label: '和食', value: '和食' },
+  { label: 'イタリアン', value: 'イタリアン' },
+  { label: 'フレンチ', value: 'フレンチ' },
+  { label: '中華', value: '中華' },
+  { label: 'インド料理', value: 'インド料理' },
   { label: 'おまかせ', value: 'おまかせ' },
 ];
 
-const dashiOptions = [
-  { label: '鰹出汁', value: '鰹出汁' },
-  { label: '昆布出汁', value: '昆布出汁' },
-  { label: '煮干し出汁', value: '煮干し出汁' },
-  { label: '干し椎茸出汁', value: '干し椎茸出汁' },
-  { label: '合わせ出汁', value: '合わせ出汁' },
+const fusionElementOptions = [
+  { label: 'アジアンテイスト', value: 'アジアンテイスト' },
+  { label: '地中海風', value: '地中海風' },
+  { label: 'メキシカン', value: 'メキシカン' },
+  { label: 'アメリカンダイナー風', value: 'アメリカンダイナー風' },
+  { label: '北欧スタイル', value: '北欧スタイル' },
+  { label: 'おまかせ', value: 'おまかせ' },
 ];
 
-const seasoningOptions = [
-  { label: '薄口醤油', value: '薄口醤油' },
-  { label: '濃口醤油', value: '濃口醤油' },
-  { label: '味噌', value: '味噌' },
-  { label: 'みりん', value: 'みりん' },
-  { label: '酢', value: '酢' },
-  { label: '砂糖', value: '砂糖' },
-  { label: '酒', value: '酒' },
+const flavorProfileOptions = [
+  { label: '甘じょっぱい', value: '甘じょっぱい' },
+  { label: 'ピリ辛', value: 'ピリ辛' },
+  { label: '酸味が効いた', value: '酸味が効いた' },
+  { label: 'クリーミー', value: 'クリーミー' },
+  { label: '軽い風味', value: '軽い風味' },
   { label: 'おまかせ', value: 'おまかせ' },
 ];
 
 const cookingMethodOptions = [
-  { label: '煮物', value: '煮物' },
-  { label: '焼き物', value: '焼き物' },
-  { label: '蒸し物', value: '蒸し物' },
-  { label: '揚げ物', value: '揚げ物' },
-  { label: '炊き込みご飯', value: '炊き込みご飯' },
-  { label: '汁物', value: '汁物' },
+  { label: 'グリル', value: 'グリル' },
+  { label: '煮込む', value: '煮込む' },
+  { label: '蒸し料理', value: '蒸し料理' },
+  { label: 'オーブン焼き', value: 'オーブン焼き' },
+  { label: '生で仕上げる', value: '生で仕上げる' },
   { label: 'おまかせ', value: 'おまかせ' },
 ];
 
-const platingStyleOptions = [
-  { label: '一汁三菜', value: '一汁三菜' },
-  { label: '和モダンスタイル', value: '和モダンスタイル' },
-  { label: '伝統的な盛り付け', value: '伝統的な盛り付け' },
-  { label: '小鉢を複数使う', value: '小鉢を複数使う' },
-  { label: 'お膳スタイル', value: 'お膳スタイル' },
-  { label: 'おまかせ', value: 'おまかせ' },
-];
-
-const TraditionalJapaneseForm = () => {
-  const [generatedRecipe, setGeneratedRecipe] = useState<string>('');
+const FusionRecipeForm = () => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [generatedRecipe, setGeneratedRecipe] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { isLargeScreen, isLandscape } = useDeviceOrientation();
 
@@ -146,14 +134,12 @@ const TraditionalJapaneseForm = () => {
     },
   });
 
-  // セレクトボックスの変更ハンドラー
   const handleSelectChange = (name: keyof FormData, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
-
   // テキストフィールドの変更ハンドラー
   const handleInputChange = (name: keyof FormData, value: string) => {
     setFormData((prev) => ({
@@ -203,10 +189,9 @@ const TraditionalJapaneseForm = () => {
         return;
       }
 
-      console.log('formData:', formData);
       // レシピ生成 API を呼び出す
       const response = await axios.post(
-        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-japanese-recipe',
+        'https://recipeapp-096ac71f3c9b.herokuapp.com/api/ai-fusion-recipe',
         formData,
         {
           headers: {
@@ -248,11 +233,10 @@ const TraditionalJapaneseForm = () => {
   // フォーム送信
   const handleSubmit = async () => {
     if (
-      !formData.season &&
-      !formData.dashi &&
-      !formData.seasoning &&
-      !formData.cookingMethod &&
-      !formData.platingStyle
+      !formData.baseCuisine &&
+      !formData.fusionElement &&
+      !formData.flavorProfile &&
+      !formData.cookingMethod
     ) {
       Alert.alert('いずれかの項目を入力してください！');
       return;
@@ -320,45 +304,42 @@ const TraditionalJapaneseForm = () => {
       >
         <View style={styles.innerContainer}>
           <Text style={styles.title}>
-            🍶 和食レシピのこだわりを選んでください
+            🌏 こだわりの異文化ミックス料理を作ろう！
           </Text>
-          <Text style={styles.label}>いずれかの項目の入力が必要です</Text>
           <CustomSelect
-            label="季節（提案する食材の季節）🌸"
-            selectedValue={formData.season}
-            onValueChange={(value) => handleSelectChange('season', value)}
-            options={seasonOptions}
+            label="ベースの料理スタイル"
+            selectedValue={formData.baseCuisine}
+            onValueChange={(value) => handleSelectChange('baseCuisine', value)}
+            options={cuisineOptions}
           />
           <CustomSelect
-            label="出汁の種類🍲"
-            selectedValue={formData.dashi}
-            onValueChange={(value) => handleSelectChange('dashi', value)}
-            options={dashiOptions}
+            label="フュージョン（組み合わせ）の要素"
+            selectedValue={formData.fusionElement}
+            onValueChange={(value) =>
+              handleSelectChange('fusionElement', value)
+            }
+            options={fusionElementOptions}
           />
           <CustomSelect
-            label="調味料のこだわり🍶"
-            selectedValue={formData.seasoning}
-            onValueChange={(value) => handleSelectChange('seasoning', value)}
-            options={seasoningOptions}
+            label="味の特徴"
+            selectedValue={formData.flavorProfile}
+            onValueChange={(value) =>
+              handleSelectChange('flavorProfile', value)
+            }
+            options={flavorProfileOptions}
           />
           <CustomSelect
-            label="調理法🔪"
+            label="調理方法"
             selectedValue={formData.cookingMethod}
             onValueChange={(value) =>
               handleSelectChange('cookingMethod', value)
             }
             options={cookingMethodOptions}
           />
-          <CustomSelect
-            label="盛り付けスタイル🍱"
-            selectedValue={formData.platingStyle}
-            onValueChange={(value) => handleSelectChange('platingStyle', value)}
-            options={platingStyleOptions}
-          />
-          <Text style={styles.label}>使いたい食材🐟</Text>
+          <Text style={styles.label}>その他使いたい食材🥕</Text>
           <TextInput
             style={styles.input}
-            placeholder="使いたい食材 🥕 (例: 筍, 秋刀魚)20文字以内"
+            placeholder="その他使いたい食材 🥕 20文字以内"
             value={formData.preferredIngredients}
             maxLength={20}
             onChangeText={(value) =>
@@ -369,14 +350,11 @@ const TraditionalJapaneseForm = () => {
             {isGenerating ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.submitButtonText}>
-                レシピを作る（約10秒） 🚀
-              </Text>
+              <Text style={styles.submitButtonText}>レシピを作る 🚀</Text>
             )}
           </TouchableOpacity>
           {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
-        {/* モーダル */}
         {modalOpen && (
           <RecipeModal
             open={modalOpen}
@@ -392,4 +370,4 @@ const TraditionalJapaneseForm = () => {
   );
 };
 
-export default TraditionalJapaneseForm;
+export default FusionRecipeForm;

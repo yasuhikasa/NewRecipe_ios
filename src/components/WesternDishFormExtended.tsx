@@ -20,18 +20,18 @@ import useDeviceOrientation from '../hooks/useDeviceOrientation';
 type FormData = {
   sauce: string;
   cookingStyle: string;
-  garnish: string;
+  // garnish: string;
   cheese: string;
-  steakDoneness: string;
+  cookingPreference: string;
   preferredIngredients: string;
 };
 
 const initialFormData: FormData = {
   sauce: '',
   cookingStyle: '',
-  garnish: '',
+  // garnish: '',
   cheese: '',
-  steakDoneness: '',
+  cookingPreference: '',
   preferredIngredients: '',
 };
 
@@ -53,14 +53,14 @@ const cookingStyleOptions = [
   { label: 'おまかせ', value: 'おまかせ' },
 ];
 
-const garnishOptions = [
-  { label: '温野菜', value: '温野菜' },
-  { label: 'フレンチフライ', value: 'フレンチフライ' },
-  { label: 'ポテトサラダ', value: 'ポテトサラダ' },
-  { label: 'ほうれん草ソテー', value: 'ほうれん草ソテー' },
-  { label: 'コールスロー', value: 'コールスロー' },
-  { label: 'おまかせ', value: 'おまかせ' },
-];
+// const garnishOptions = [
+//   { label: '温野菜', value: '温野菜' },
+//   { label: 'フレンチフライ', value: 'フレンチフライ' },
+//   { label: 'ポテトサラダ', value: 'ポテトサラダ' },
+//   { label: 'ほうれん草ソテー', value: 'ほうれん草ソテー' },
+//   { label: 'コールスロー', value: 'コールスロー' },
+//   { label: 'おまかせ', value: 'おまかせ' },
+// ];
 
 const cheeseOptions = [
   { label: 'モッツァレラ', value: 'モッツァレラ' },
@@ -71,11 +71,12 @@ const cheeseOptions = [
   { label: 'おまかせ', value: 'おまかせ' },
 ];
 
-const steakDonenessOptions = [
-  { label: 'レア', value: 'レア' },
-  { label: 'ミディアムレア', value: 'ミディアムレア' },
-  { label: 'ミディアム', value: 'ミディアム' },
-  { label: 'ウェルダン', value: 'ウェルダン' },
+const cookingPreferenceOptions = [
+  { label: '焼く', value: '焼く' },
+  { label: '煮る', value: '煮る' },
+  { label: '蒸す', value: '蒸す' },
+  { label: '揚げる', value: '揚げる' },
+  { label: 'グリル', value: 'グリル' },
   { label: 'おまかせ', value: 'おまかせ' },
 ];
 
@@ -162,7 +163,7 @@ const WesternDishForm = () => {
 
   // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
-    const pointsToConsume = 2; // レシピ1回あたり消費するポイント
+    const pointsToConsume = 3; // レシピ1回あたり消費するポイント
     // let pointsConsumed = false; // ポイント消費フラグ
 
     try {
@@ -249,9 +250,9 @@ const WesternDishForm = () => {
     if (
       !formData.sauce &&
       !formData.cookingStyle &&
-      !formData.garnish &&
+      // !formData.garnish &&
       !formData.cheese &&
-      !formData.steakDoneness
+      !formData.cookingPreference
     ) {
       Alert.alert('いずれかの項目を選択してください！');
       return;
@@ -334,12 +335,12 @@ const WesternDishForm = () => {
             onValueChange={(value) => handleSelectChange('cookingStyle', value)}
             options={cookingStyleOptions}
           />
-          <CustomSelect
+          {/* <CustomSelect
             label="付け合わせ🥗"
             selectedValue={formData.garnish}
             onValueChange={(value) => handleSelectChange('garnish', value)}
             options={garnishOptions}
-          />
+          /> */}
           <CustomSelect
             label="チーズの種類🧀"
             selectedValue={formData.cheese}
@@ -347,12 +348,12 @@ const WesternDishForm = () => {
             options={cheeseOptions}
           />
           <CustomSelect
-            label="ステーキの焼き加減🥩"
-            selectedValue={formData.steakDoneness}
+            label="調理プロセスの好み🥩"
+            selectedValue={formData.cookingPreference}
             onValueChange={(value) =>
-              handleSelectChange('steakDoneness', value)
+              handleSelectChange('cookingPreference', value)
             }
-            options={steakDonenessOptions}
+            options={cookingPreferenceOptions}
           />
           <Text style={styles.label}>🍅 使いたい食材</Text>
           <TextInput

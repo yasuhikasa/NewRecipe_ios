@@ -170,8 +170,14 @@ export const removeLabelFromRecipe = async (
 export const fetchRecipesWithLabels = async (
   user_id: string,
   label_id?: string,
+  limit: number = 20,
+  offset: number = 0,
 ): Promise<{ labels: Label[]; recipes: Recipe[] }> => {
-  const params: Record<string, string | undefined> = { user_id };
+  const params: Record<string, string | number | undefined> = {
+    user_id,
+    limit,
+    offset,
+  };
   if (label_id) {
     params.label_id = label_id;
   }

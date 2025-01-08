@@ -223,7 +223,7 @@ const LunchboxFormExtended = () => {
 
   // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
-    const pointsToConsume = 2; // レシピ1回あたり消費するポイント
+    const pointsToConsume = 3; // レシピ1回あたり消費するポイント
     // let pointsConsumed = false; // ポイント消費フラグ
 
     try {

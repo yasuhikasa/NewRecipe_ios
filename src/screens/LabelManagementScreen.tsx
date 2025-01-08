@@ -99,6 +99,13 @@ const LabelManagementScreen: React.FC<{ navigation: any }> = ({
       fontSize: isLargeScreen ? 18 : 16,
       color: '#777',
     },
+    description: {
+      fontSize: 18,
+      color: '#333',
+      textAlign: 'center',
+      marginBottom: 20,
+      paddingHorizontal: 20,
+    },
   });
 
   const loadLabels = async () => {
@@ -189,7 +196,9 @@ const LabelManagementScreen: React.FC<{ navigation: any }> = ({
   return (
     <View style={styles.container}>
       <Text style={styles.header}>ラベル管理</Text>
-
+      <Text style={styles.description}>
+        ⭐️ラベルを作成し、レシピ一覧ページでレシピを整理できます。
+      </Text>
       <View style={styles.addLabelContainer}>
         <TextInput
           style={styles.input}

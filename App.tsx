@@ -32,6 +32,10 @@ import WesternDishCreateScreen from './src/screens/WesternDishCreateScreen';
 import BistroDishCreateScreen from './src/screens/BistroDishCreateScreen';
 import CocktailCreateScreen from './src/screens/CocktailCreateScreen';
 import SpecialDayCreateScreen from './src/screens/SpecialDayCreateScreen';
+import FusionCreateScreen from './src/screens/FusionCreateScreen';
+import Free1CreateScreen from './src/screens/Free1CreateScreen';
+import Free2CreateScreen from './src/screens/Free2CreateScreen';
+import LeftoverCreateScreen from './src/screens/LeftoverCreateScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -194,6 +198,26 @@ function App() {
           name="LabelManagement"
           component={LabelManagementScreen}
           options={{ title: 'ラベル（カテゴリ）作成' }}
+        />
+        <Stack.Screen
+          name="FusionRecipeCreate"
+          component={FusionCreateScreen}
+          options={{ title: '異文化ミックスレシピを作成' }}
+        />
+        <Stack.Screen
+          name="LeftoverCreate"
+          component={LeftoverCreateScreen}
+          options={{ title: '冷蔵庫の余り物レシピを作成' }}
+        />
+        <Stack.Screen
+          name="Free1RecipeCreate"
+          component={Free1CreateScreen}
+          options={{ title: '無料レシピを作成' }}
+        />
+        <Stack.Screen
+          name="Free2RecipeCreate"
+          component={Free2CreateScreen}
+          options={{ title: '無料レシピを作成' }}
         />
         <Stack.Screen
           name="RecipeList"

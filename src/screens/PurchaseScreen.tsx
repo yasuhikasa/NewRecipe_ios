@@ -25,8 +25,8 @@ import { RootStackParamList } from '../types/types';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 const skuToPointsMap: Record<string, number> = {
-  'com.example.recipe.points_100': 40,
-  'com.example.recipe.points_200': 100,
+  'com.example.recipe.points_100': 30,
+  'com.example.recipe.points_200': 75,
 };
 
 type PurchaseScreenNavigationProp = StackNavigationProp<
