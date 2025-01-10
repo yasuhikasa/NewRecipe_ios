@@ -132,7 +132,7 @@ const RecipeListScreen: React.FC = () => {
           limit,
           offset,
           'created_at', // 並び替えのフィールド
-          'desc',      // 降順で新しい順
+          'desc', // 降順で新しい順
         );
 
         if (isRefreshing) {

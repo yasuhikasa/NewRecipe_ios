@@ -351,7 +351,9 @@ const FusionRecipeForm = () => {
             {isGenerating ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.submitButtonText}>レシピを作る（約10秒） 🚀</Text>
+              <Text style={styles.submitButtonText}>
+                レシピを作る（約10秒） 🚀
+              </Text>
             )}
           </TouchableOpacity>
           {error && <Text style={styles.errorText}>{error}</Text>}

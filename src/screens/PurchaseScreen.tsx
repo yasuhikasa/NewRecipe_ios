@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   View,
@@ -44,6 +44,29 @@ const PurchaseScreen: React.FC = () => {
   const navigation = useNavigation<PurchaseScreenNavigationProp>();
   const isLargeScreen = screenWidth > 768; // iPadかどうか判定
 
+  const processPurchase = useCallback(
+    async (purchase: any, pointsToAdd: number): Promise<void> => {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (error || !data?.user) {
+          throw new Error('ユーザー認証情報が取得できませんでした');
+        }
+
+        const userId = data.user.id;
+
+        // 購入情報とポイントの更新処理
+        console.log('Saving purchase info to database...');
+        await savePurchaseInfoToDatabase(userId, purchase.transactionId);
+        console.log('Updating points...');
+        await updatePointsInSupabase(userId, pointsToAdd);
+      } catch (error) {
+        console.error('Purchase processing failed:', error);
+        throw error;
+      }
+    },
+    [], // 依存配列が空なので、最初のレンダリング時のみ作成される
+  );
+
   useEffect(() => {
     const initializeIAP = async () => {
       try {
@@ -81,8 +104,8 @@ const PurchaseScreen: React.FC = () => {
             throw new Error('購入アイテムが不明です');
           }
 
-          console.log('Updating points in Supabase...');
-          await updatePointsInSupabase(pointsToAdd);
+          console.log('Processing purchase and updating points...');
+          await processPurchase(purchase, pointsToAdd);
 
           console.log('Finishing transaction...');
           await finishTransaction({
@@ -98,7 +121,7 @@ const PurchaseScreen: React.FC = () => {
         } finally {
           setIsProcessing(false);
         }
-      }
+      },
     );
 
     const purchaseErrorSubscription = purchaseErrorListener((error) => {
@@ -113,17 +136,38 @@ const PurchaseScreen: React.FC = () => {
       purchaseUpdateSubscription.remove();
       purchaseErrorSubscription.remove();
     };
-  }, [navigation]);
+  }, [navigation, processPurchase]);
 
-  const updatePointsInSupabase = async (pointsToAdd: number): Promise<void> => {
+  // 購入情報をデータベースに保存する関数
+  const savePurchaseInfoToDatabase = async (
+    userId: string,
+    transactionId: string,
+  ): Promise<void> => {
+    try {
+      const { data, error } = await supabase.from('purchase_info').insert([
+        {
+          user_id: userId,
+          transaction_id: transactionId,
+          created_at: new Date(),
+        },
+      ]);
+      if (error) {
+        throw new Error(`Error saving purchase info: ${error.message}`);
+      }
+      console.log('Purchase info saved to database:', data);
+    } catch (error) {
+      console.error('Error saving purchase info to database:', error);
+      throw error;
+    }
+  };
+
+  // Supabaseのポイントを更新する関数
+  const updatePointsInSupabase = async (
+    userId: string,
+    pointsToAdd: number,
+  ): Promise<void> => {
     try {
       console.log('Fetching user data from Supabase...');
-      const { data, error } = await supabase.auth.getUser();
-      if (error || !data?.user)
-        throw new Error('ユーザー認証情報が取得できませんでした。');
-
-      const userId = data.user.id;
-
       const { data: existingPoints, error: fetchError } = await supabase
         .from('points')
         .select('total_points')

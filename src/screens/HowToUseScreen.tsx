@@ -87,9 +87,7 @@ const HowToUseScreen: React.FC = () => {
       <Text style={styles.text}>
         今後、こだわりを選択するテンプレートを拡張していこうと思っておりますので、よろしくお願いいたします。
       </Text>
-      <Text style={styles.text}>
-        フィードバックもお待ちしております。
-      </Text>
+      <Text style={styles.text}>フィードバックもお待ちしております。</Text>
       <Text style={styles.title}>レシピのデザインについて</Text>
       <Text style={styles.text}>
         統一のデザインになるようAIを調整していますが、時々レイアウトが微妙に変更されることがあります。ご了承ください。

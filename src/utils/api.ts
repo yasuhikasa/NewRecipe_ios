@@ -173,7 +173,7 @@ export const fetchRecipesWithLabels = async (
   limit: number = 20,
   offset: number = 0,
   sortField: string = 'created_at', // 並び替えフィールド
-  sortOrder: string = 'desc',      // 並び替え順
+  sortOrder: string = 'desc', // 並び替え順
 ): Promise<{ labels: Label[]; recipes: Recipe[] }> => {
   const params: Record<string, string | number | undefined> = {
     user_id,
