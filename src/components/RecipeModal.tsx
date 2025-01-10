@@ -33,7 +33,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
 }) => {
   const [title, setTitle] = useState<string>('');
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const { isLargeScreen } = useDeviceOrientation();
+  const { isLargeScreen, isLandscape } = useDeviceOrientation();
 
   // レシピタイトルを抽出して初期値を設定
   useEffect(() => {
@@ -75,13 +75,17 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: isLargeScreen ? 40 : 20,
+      padding: isLargeScreen ? 30 : 10,
     },
     modalContainer: {
       backgroundColor: '#fff',
       borderRadius: 8,
-      width: isLargeScreen ? '80%' : '90%',
-      maxHeight: '90%',
+      width: isLargeScreen
+      ? isLandscape
+        ? '70%'
+        : '80%'
+      : '95%',
+      maxHeight: isLargeScreen ? '80%' : '90%',
       padding: isLargeScreen ? 20 : 12,
     },
     contentContainer: {
@@ -150,8 +154,8 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
 
   const mstyles = StyleSheet.create({
     body: {
-      fontSize: isLargeScreen ? 18 : 16,
-      lineHeight: isLargeScreen ? 26 : 24,
+      fontSize: isLargeScreen ? 20 : 16,
+      lineHeight: isLargeScreen ? 28 : 24,
       color: '#333',
       marginBottom: 8,
     },
@@ -174,7 +178,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
       color: '#f08080',
     },
     heading4: {
-      fontSize: isLargeScreen ? 18 : 16,
+      fontSize: isLargeScreen ? 20 : 16,
       fontWeight: 'bold',
       marginBottom: 6,
       marginTop: 6,

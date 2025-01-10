@@ -111,14 +111,14 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      padding: isLargeScreen ? (isLandscape ? 40 : 30) : 20,
+      padding: isLargeScreen ? (isLandscape ? 40 : 30) : 10,
     },
     modalContainer: {
       backgroundColor: '#fff',
       borderRadius: 12,
       padding: isLargeScreen ? 20 : 16,
-      width: isLargeScreen ? (isLandscape ? '60%' : '80%') : '90%',
-      maxHeight: '80%',
+      width: isLargeScreen ? (isLandscape ? '70%' : '80%') : '90%',
+      maxHeight: isLargeScreen ? '80%' : '90%',
       justifyContent: 'space-between',
     },
     contentContainer: {
@@ -160,7 +160,7 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
 
   const markdownStyles = StyleSheet.create({
     body: {
-      fontSize: isLargeScreen ? 18 : 16,
+      fontSize: isLargeScreen ? 20 : 16,
       lineHeight: isLargeScreen ? 28 : 24,
       color: '#333',
       marginBottom: isLargeScreen ? 14 : 12,
@@ -184,7 +184,7 @@ const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
       marginBottom: isLargeScreen ? 12 : 8,
     },
     heading4: {
-      fontSize: isLargeScreen ? 18 : 16,
+      fontSize: isLargeScreen ? 20 : 16,
       fontWeight: 'bold',
       marginBottom: 6,
       marginTop: 6,

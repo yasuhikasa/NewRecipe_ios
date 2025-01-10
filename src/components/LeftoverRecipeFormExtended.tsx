@@ -153,14 +153,10 @@ const LeftoverRecipeForm = () => {
 
   // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
-    const pointsToConsume = 3; // レシピ1回あたり消費するポイント
+    const pointsToConsume = 2; // レシピ1回あたり消費するポイント
     // let pointsConsumed = false; // ポイント消費フラグ
 
     try {
-      setIsGenerating(true);
-      setGeneratedRecipe(''); // 初期化
-      setModalOpen(true); // モーダルを先に開く
-
       const { data: userData, error: userError } =
         await supabase.auth.getUser();
       if (userError || !userData?.user?.id) {
@@ -191,6 +187,11 @@ const LeftoverRecipeForm = () => {
         );
         return;
       }
+
+      // ポイントが足りている場合、以下の処理を続行
+      setIsGenerating(true);
+      setGeneratedRecipe(''); // 初期化
+      setModalOpen(true); // モーダルを先に開く
 
       console.log('formData:', formData);
 

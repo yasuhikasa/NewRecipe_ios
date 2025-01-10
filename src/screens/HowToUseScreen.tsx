@@ -78,12 +78,16 @@ const HowToUseScreen: React.FC = () => {
 
       <Text style={styles.title}>ポイントについて</Text>
       <Text style={styles.text}>
-        1レシピの作成に3ポイント消費いたします。初回サインイン時にお試しで15ポイント付与していますので、どうぞお試しください。
+        1レシピの作成に2ポイント消費いたします。初回サインイン時にお試しで10ポイント付与していますので、どうぞお試しください。
       </Text>
 
       <Text style={styles.text}>
-        現在、１５種類のこだわりを選択するテンプレートを用意しております。
+        現在、１５種類のジャンルに及ぶ、レシピ作成用のテンプレートを用意しております。
+      </Text>
+      <Text style={styles.text}>
         今後、こだわりを選択するテンプレートを拡張していこうと思っておりますので、よろしくお願いいたします。
+      </Text>
+      <Text style={styles.text}>
         フィードバックもお待ちしております。
       </Text>
       <Text style={styles.title}>レシピのデザインについて</Text>

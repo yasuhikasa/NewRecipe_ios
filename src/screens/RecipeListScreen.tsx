@@ -124,13 +124,15 @@ const RecipeListScreen: React.FC = () => {
       if (!isRefreshing && page > 0) setLoadingNextPage(true);
       try {
         const user = await getUser();
-        const limit = 20; // 1ページあたりの件数
+        const limit = 30; // 1ページあたりの件数
         const offset = page * limit;
         const { labels, recipes: newRecipes } = await fetchRecipesWithLabels(
           user.id,
           labelId || undefined,
           limit,
           offset,
+          'created_at', // 並び替えのフィールド
+          'desc',      // 降順で新しい順
         );
 
         if (isRefreshing) {
@@ -229,7 +231,9 @@ const RecipeListScreen: React.FC = () => {
       </View>
       <View>
         <Text style={styles.operationGuide}>
-          レシピをタップするとレシピの詳細を表示できます。レシピを長押しするとレシピ名の編集とラベル分けができます。
+          🥝レシピをタップするとレシピの詳細を表示できます。
+          {'\n'}
+          🍓レシピを長押しするとレシピ名の編集とラベル分けができます。
         </Text>
       </View>
       {/* レシピセクション */}

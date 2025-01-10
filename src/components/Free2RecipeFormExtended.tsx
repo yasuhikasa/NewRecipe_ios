@@ -129,7 +129,7 @@ const Free2RecipeForm = () => {
       const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD形式
 
       if (lastRequestDate === today) {
-        Alert.alert('制限', 'お試し版は1日1回です。続きはサインイン後にご利用ください。');
+        Alert.alert('制限', 'お試し版は1日1回です（午前9時更新）。続きはサインイン後にご利用ください。');
         return false;
       }
 

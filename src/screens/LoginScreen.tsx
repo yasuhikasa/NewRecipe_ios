@@ -191,7 +191,7 @@ const LoginScreen: React.FC = () => {
       console.log('ポイントを新規作成します:', userId);
       const { error: insertError } = await supabase.from('points').insert({
         user_id: userId,
-        total_points: 15,
+        total_points: 10,
       });
 
       if (insertError) {

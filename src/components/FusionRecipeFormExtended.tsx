@@ -150,14 +150,10 @@ const FusionRecipeForm = () => {
 
   // レシピ生成関数（ストリーミング無効化）
   const generateRecipe = async () => {
-    const pointsToConsume = 3; // レシピ1回あたり消費するポイント
+    const pointsToConsume = 2; // レシピ1回あたり消費するポイント
     // let pointsConsumed = false; // ポイント消費フラグ
 
     try {
-      setIsGenerating(true);
-      setGeneratedRecipe(''); // 初期化
-      setModalOpen(true); // モーダルを先に開く
-
       const { data: userData, error: userError } =
         await supabase.auth.getUser();
       if (userError || !userData?.user?.id) {
@@ -188,6 +184,11 @@ const FusionRecipeForm = () => {
         );
         return;
       }
+
+      // ポイントが足りている場合、以下の処理を続行
+      setIsGenerating(true);
+      setGeneratedRecipe(''); // 初期化
+      setModalOpen(true); // モーダルを先に開く
 
       // レシピ生成 API を呼び出す
       const response = await axios.post(
@@ -350,7 +351,7 @@ const FusionRecipeForm = () => {
             {isGenerating ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.submitButtonText}>レシピを作る 🚀</Text>
+              <Text style={styles.submitButtonText}>レシピを作る（約10秒） 🚀</Text>
             )}
           </TouchableOpacity>
           {error && <Text style={styles.errorText}>{error}</Text>}

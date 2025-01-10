@@ -25,8 +25,9 @@ import { RootStackParamList } from '../types/types';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 const skuToPointsMap: Record<string, number> = {
-  'com.example.recipe.points_100': 30,
-  'com.example.recipe.points_200': 75,
+  'com.example.recipe.points_100': 20,
+  'com.example.recipe.points_200': 50,
+  'com.example.recipe.points_300': 90,
 };
 
 type PurchaseScreenNavigationProp = StackNavigationProp<
@@ -53,7 +54,15 @@ const PurchaseScreen: React.FC = () => {
         setIsLoading(true); // ローディング開始
         const items = await getProducts({ skus: Object.keys(skuToPointsMap) });
         console.log('Fetched products:', items);
-        setProducts(items);
+
+        // 並び替え処理
+        const sortedItems = items.sort((a, b) => {
+          const indexA = Object.keys(skuToPointsMap).indexOf(a.productId);
+          const indexB = Object.keys(skuToPointsMap).indexOf(b.productId);
+          return indexA - indexB;
+        });
+
+        setProducts(sortedItems);
       } catch (error) {
         console.error('IAP Initialization Failed:', error);
         Alert.alert('エラー', 'IAPの初期化に失敗しました');
@@ -89,7 +98,7 @@ const PurchaseScreen: React.FC = () => {
         } finally {
           setIsProcessing(false);
         }
-      },
+      }
     );
 
     const purchaseErrorSubscription = purchaseErrorListener((error) => {
