@@ -1,4 +1,3 @@
-// src/screens/LabelManagementScreen.tsx
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -10,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { fetchLabels, addLabel, deleteLabel, getUser } from '../utils/api';
+import { fetchLabels, addLabel, deleteLabel, updateLabel, getUser } from '../utils/api';
 import { Label } from '../types/types';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
@@ -25,8 +24,11 @@ const LabelManagementScreen: React.FC<{ navigation: any }> = ({
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      padding: isLargeScreen ? (isLandscape ? 50 : 40) : 16, // iPadなら余白を広げる
       backgroundColor: '#FFF8E1',
+    },
+    contentContainer: {
+      flexGrow: 1,
+      padding: isLargeScreen ? (isLandscape ? 50 : 40) : 16, // iPadなら余白を広げる
     },
     header: {
       fontSize: isLargeScreen ? 28 : 24, // iPad用にフォントサイズを調整
@@ -90,6 +92,16 @@ const LabelManagementScreen: React.FC<{ navigation: any }> = ({
       borderRadius: 5,
     },
     deleteButtonText: {
+      color: '#fff',
+      fontSize: isLargeScreen ? 16 : 14,
+    },
+    editButton: {
+      backgroundColor: '#4caf50',
+      paddingVertical: isLargeScreen ? 8 : 6,
+      paddingHorizontal: isLargeScreen ? 14 : 12,
+      borderRadius: 5,
+    },
+    editButtonText: {
       color: '#fff',
       fontSize: isLargeScreen ? 16 : 14,
     },
@@ -181,59 +193,104 @@ const LabelManagementScreen: React.FC<{ navigation: any }> = ({
     }
   };
 
+  const handleEditLabel = (id: string, currentName: string) => {
+    Alert.prompt(
+      'ラベル名を変更',
+      '新しいラベル名を入力してください',
+      [
+        {
+          text: 'キャンセル',
+          style: 'cancel',
+        },
+        {
+          text: '変更',
+          onPress: async (newName) => {
+            if (newName?.trim()) {
+              setLoading(true);
+              try {
+                // getUser() でユーザー情報を取得し、その後ラベルを更新
+                const user = await getUser(); // 非同期でユーザー情報を取得
+                await updateLabel(id, newName.trim(), user.id); // ユーザーの id を渡す
+                
+                const updatedLabels = await fetchLabels(user.id); // 最新のラベルを取得
+                setLabels(updatedLabels);
+              } catch (error: any) {
+                console.error('Error updating label:', error.message);
+                Alert.alert('Error', error.message);
+              } finally {
+                setLoading(false);
+              }
+            }
+          },
+        },
+      ],
+      'plain-text',
+      currentName
+    );
+  };
+
   const renderLabelItem = ({ item }: { item: Label }) => (
     <View style={styles.labelItem}>
       <Text style={styles.labelName}>{item.name}</Text>
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => handleDeleteLabel(String(item.id))}
-      >
-        <Text style={styles.deleteButtonText}>削除</Text>
-      </TouchableOpacity>
+      <View style={{ flexDirection: 'row' }}>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => handleEditLabel(String(item.id), item.name)}
+        >
+          <Text style={styles.editButtonText}>変更</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => handleDeleteLabel(String(item.id))}
+        >
+          <Text style={styles.deleteButtonText}>削除</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>ラベル管理</Text>
-      <Text style={styles.description}>
-        ⭐️ラベルを作成し、レシピ一覧ページでレシピを整理できます。
-      </Text>
-      <View style={styles.addLabelContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="新しいラベル名"
-          value={newLabel}
-          onChangeText={setNewLabel}
-          maxLength={20}
-        />
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={handleAddLabel}
-          disabled={loading}
-        >
-          <Text style={styles.addButtonText}>追加</Text>
-        </TouchableOpacity>
-      </View>
-
-      {loading ? (
-        <ActivityIndicator
-          size="large"
-          color="#ff6347"
-          style={{ marginTop: 20 }}
-        />
-      ) : (
-        <FlatList
-          data={labels}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={renderLabelItem}
-          contentContainerStyle={styles.list}
-          ListEmptyComponent={
-            <Text style={styles.emptyText}>ラベルがありません。</Text>
-          }
-        />
-      )}
-    </View>
+    <FlatList
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      data={labels}
+      keyExtractor={(item) => String(item.id)}
+      renderItem={renderLabelItem}
+      ListEmptyComponent={
+        <Text style={styles.emptyText}>ラベルがありません。</Text>
+      }
+      ListHeaderComponent={
+        <>
+          <Text style={styles.header}>ラベル管理</Text>
+          <Text style={styles.description}>
+            ⭐️ラベルを作成し、レシピ一覧ページでレシピを整理できます。
+          </Text>
+          <View style={styles.addLabelContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="新しいラベル名(10文字以内)"
+              value={newLabel}
+              onChangeText={setNewLabel}
+              maxLength={10}
+            />
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={handleAddLabel}
+              disabled={loading}
+            >
+              <Text style={styles.addButtonText}>追加</Text>
+            </TouchableOpacity>
+          </View>
+          {loading && (
+            <ActivityIndicator
+              size="large"
+              color="#ff6347"
+              style={{ marginTop: 20 }}
+            />
+          )}
+        </>
+      }
+    />
   );
 };
 

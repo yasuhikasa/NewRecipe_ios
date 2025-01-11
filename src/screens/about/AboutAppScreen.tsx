@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/types';
@@ -34,6 +35,8 @@ const AboutAppScreen: React.FC<Props> = ({ navigation }: any) => {
     container: {
       flex: 1,
       backgroundColor: '#FFF8E1',
+    },
+    contentContainer: {
       alignItems: 'center',
       justifyContent: 'center',
       padding: isLargeScreen ? 60 : 20, // iPadでは余白を多く
@@ -61,7 +64,10 @@ const AboutAppScreen: React.FC<Props> = ({ navigation }: any) => {
   });
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+    >
       <Text style={styles.title}>このアプリについて</Text>
 
       <TouchableOpacity
@@ -91,7 +97,7 @@ const AboutAppScreen: React.FC<Props> = ({ navigation }: any) => {
       >
         <Text style={styles.buttonText}>アプリ運営者情報</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 

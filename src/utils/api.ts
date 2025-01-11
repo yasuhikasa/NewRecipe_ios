@@ -16,6 +16,7 @@ export const getUser = async () => {
 };
 
 // ラベル取得
+// ラベル取得
 export const fetchLabels = async (user_id: string): Promise<Label[]> => {
   try {
     const response = await axios.get(`${API_BASE_URL}/labels`, {
@@ -25,7 +26,11 @@ export const fetchLabels = async (user_id: string): Promise<Label[]> => {
     console.log('Fetch Labels Response:', response.data);
 
     if (response.status === 200) {
-      return response.data.labels;
+      // ラベルをidの昇順でソート
+      const sortedLabels = response.data.labels.sort((a: Label, b: Label) => {
+        return a.id - b.id; // idが小さいものから並べる
+      });
+      return sortedLabels;
     } else {
       throw new Error('Failed to fetch labels');
     }
@@ -201,4 +206,23 @@ export const fetchRecipesWithLabels = async (
     console.error('Error in fetchRecipesWithLabels:', error.message);
     throw new Error('データの取得に失敗しました');
   }
+};
+
+// ラベル更新の関数
+export const updateLabel = async (
+  labelId: string,
+  newName: string,
+  userId: string
+) => {
+  const { data, error } = await supabase
+    .from('labels')
+    .update({ name: newName })
+    .eq('id', labelId)
+    .eq('user_id', userId);
+
+  if (error) {
+    throw new Error(`Label update failed: ${error.message}`);
+  }
+
+  return data;
 };

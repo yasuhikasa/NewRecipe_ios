@@ -8,6 +8,7 @@ import {
   Dimensions,
   Modal,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import RNIap, {
   Product as IAPProduct,
@@ -259,7 +260,7 @@ const PurchaseScreen: React.FC = () => {
   });
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FF7043" />
@@ -290,7 +291,7 @@ const PurchaseScreen: React.FC = () => {
           <Text style={styles.modalText}>購入処理中です...</Text>
         </View>
       </Modal>
-    </View>
+    </ScrollView>
   );
 };
 
