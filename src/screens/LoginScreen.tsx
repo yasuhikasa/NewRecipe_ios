@@ -280,7 +280,7 @@ const LoginScreen: React.FC = () => {
           onPress={() => navigation.navigate('Free1RecipeCreate')}
         >
           <Text style={styles.recipeButtonText}>
-            冷蔵庫レシピを作成（約10秒） 🚀
+            こだわりの冷蔵庫レシピを作成 🚀
           </Text>
         </TouchableOpacity>
 
@@ -293,7 +293,7 @@ const LoginScreen: React.FC = () => {
           onPress={() => navigation.navigate('Free2RecipeCreate')}
         >
           <Text style={styles.recipeButtonText}>
-            気分で選ぶレシピを作成 （約10秒）🌟
+            気分でこだわりレシピを作成 🌟
           </Text>
         </TouchableOpacity>
         <RecipeSampleModal

@@ -212,7 +212,7 @@ export const fetchRecipesWithLabels = async (
 export const updateLabel = async (
   labelId: string,
   newName: string,
-  userId: string
+  userId: string,
 ) => {
   const { data, error } = await supabase
     .from('labels')

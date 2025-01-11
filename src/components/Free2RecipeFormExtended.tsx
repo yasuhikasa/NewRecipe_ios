@@ -47,9 +47,12 @@ const ingredientCategoryOptions = [
 ];
 
 const moodOptions = [
-  { label: '元気がない', value: '元気がない' },
+  { label: '疲れて元気がない', value: '疲れて元気がない' },
+  { label: '料理でテンションを上げたい', value: '料理でテンションを上げたい' },
+  { label: '食べる人を喜ばせたい', value: '食べる人を喜ばせたい' },
   { label: 'リラックスしたい', value: 'リラックスしたい' },
   { label: 'やる気を出したい', value: 'やる気を出したい' },
+  { label: '時短で作りたい', value: '時短で作りたい' },
   { label: 'おまかせ', value: 'おまかせ' },
 ];
 
@@ -57,6 +60,10 @@ const purposeOptions = [
   { label: '健康', value: '健康' },
   { label: 'リフレッシュ', value: 'リフレッシュ' },
   { label: '満腹感を得たい', value: '満腹感を得たい' },
+  { label: 'エネルギーチャージ', value: 'エネルギーチャージ' }, // 追加
+  { label: 'ダイエット', value: 'ダイエット' }, // 追加
+  { label: 'ヘルシー志向', value: 'ヘルシー志向' },
+  { label: 'スタミナ重視', value: 'スタミナ重視' },
   { label: 'おまかせ', value: 'おまかせ' },
 ];
 

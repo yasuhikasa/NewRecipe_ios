@@ -9,7 +9,13 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { fetchLabels, addLabel, deleteLabel, updateLabel, getUser } from '../utils/api';
+import {
+  fetchLabels,
+  addLabel,
+  deleteLabel,
+  updateLabel,
+  getUser,
+} from '../utils/api';
 import { Label } from '../types/types';
 import useDeviceOrientation from '../hooks/useDeviceOrientation';
 
@@ -211,7 +217,7 @@ const LabelManagementScreen: React.FC<{ navigation: any }> = ({
                 // getUser() でユーザー情報を取得し、その後ラベルを更新
                 const user = await getUser(); // 非同期でユーザー情報を取得
                 await updateLabel(id, newName.trim(), user.id); // ユーザーの id を渡す
-                
+
                 const updatedLabels = await fetchLabels(user.id); // 最新のラベルを取得
                 setLabels(updatedLabels);
               } catch (error: any) {
@@ -225,7 +231,7 @@ const LabelManagementScreen: React.FC<{ navigation: any }> = ({
         },
       ],
       'plain-text',
-      currentName
+      currentName,
     );
   };
 
