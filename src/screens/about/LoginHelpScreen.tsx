@@ -87,7 +87,7 @@ const LoginHelpScreen: React.FC = () => {
         <Text style={styles.text}>
           新規登録やログインでお困りの場合は、以下のメールアドレスにお問い合わせください。
         </Text>
-        <Text style={styles.text}>お問い合わせ先: info@sinamonoinfo.com</Text>
+        <Text style={styles.text}>お問い合わせ先: nkun04183@gmail.com</Text>
         <Text style={styles.note}>
           ※メールにてお問い合わせの際は、具体的な状況（例:
           どのような不具合が発生したか等）を記載いただけるとスムーズに対応できます。

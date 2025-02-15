@@ -112,7 +112,7 @@ const PrivacyPolicyScreen: React.FC = () => {
         <Text style={styles.text}>
           プライバシーポリシーに関するお問い合わせは、以下の連絡先までお願いいたします。
         </Text>
-        <Text style={styles.text}>メールアドレス: info@sinamonoinfo.com</Text>
+        <Text style={styles.text}>メールアドレス: nkun04183@gmail.com</Text>
       </View>
     </ScrollView>
   );

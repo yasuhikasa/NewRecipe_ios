@@ -136,7 +136,7 @@ const TermsOfServiceScreen: React.FC = () => {
         {'\n\n'}
         サポート対応時間は、平日9:00～18:00（日本時間）とします。
         {'\n\n'}
-        お問い合わせは、メール（info@sinamonoinfo.com）またはアプリ内のお問い合わせフォームよりお願いいたします。
+        お問い合わせは、メール（nkun04183@gmail.com）またはアプリ内のお問い合わせフォームよりお願いいたします。
       </Text>
 
       <Text style={styles.heading}>第11条（知的財産権）</Text>

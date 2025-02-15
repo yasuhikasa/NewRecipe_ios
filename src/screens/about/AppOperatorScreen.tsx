@@ -49,7 +49,7 @@ const AppOperatorScreen: React.FC = () => {
       <Text style={styles.text}>
         所在地: 東京都中野区野方6-28-9ハイツエリカ201
       </Text>
-      <Text style={styles.text}>連絡先: info@sinamonoinfo.com</Text>
+      <Text style={styles.text}>連絡先: nkun04183@gmail.com</Text>
       <Text style={styles.note}>※お問い合わせはメールでお願いいたします。</Text>
     </ScrollView>
   );
